@@ -1,0 +1,11 @@
+Photorealistic editorial headshot, 3x3 expression grid, same subject and lighting across all nine panels for consistency.
+
+Subject: original character — professional woman, late 30s, oval face, warm olive skin tone (#C98F61), dark brown shoulder-length wavy hair, hazel eyes, tailored charcoal blazer over white shirt.
+
+Nine expressions: neutral/attentive, warm smile, thoughtful (touching silver ring), encouraging, concerned/empathetic, dry amusement, reassuring (open palm), confident/direct, quiet concentration.
+
+Background: consistent neutral warm off-white (#F1ECEA) studio background across all panels.
+
+Style: corporate editorial photography, muted neutral color grade, best quality, highly detailed, masterpiece.
+
+Negative prompt: cartoon, anime, 3D render, CGI, uncanny AI-face artifacts, plastic skin, inconsistent lighting between panels, celebrity likeness, copying any real/identifiable person.

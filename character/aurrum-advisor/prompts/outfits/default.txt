@@ -1,0 +1,5 @@
+Default professional outfit — photorealistic editorial photography.
+
+Tailored charcoal blazer (#2A2A2E) over a crisp white button shirt, dark tailored trousers, minimal silver jewelry (thin ring on right hand), no visible logos. Clean, modern, quietly confident professional wardrobe — reads as a senior advisor, not sales/corporate-generic.
+
+Same subject as consistency.yaml. Negative prompt: no logos, no flashy patterns, no cartoon/anime/3D-render style, no celebrity likeness.

@@ -1,0 +1,25 @@
+# Consistency anchor for the Aurrum Careers AI advisor character.
+# Original character — NOT the uploaded reference photo. The reference was
+# used only as a mood/style direction (professional editorial portrait,
+# modern office, natural lighting), per the skill's IP policy.
+
+art_style: "Photorealistic editorial portrait photography — natural light, shallow depth of field, modern glass-office background, muted neutral grade. NOT illustration, NOT 3D render, NOT anime."
+style_reference: "Corporate editorial photography, similar mood to LinkedIn/Fortune executive portraits — not the specific uploaded photo, which depicts a real identifiable person and is not to be reproduced."
+
+color_palette:
+  - "#DD5730"   # Aurrum accent — used only in wardrobe/background accent, never skin/hair
+  - "#2A2A2E"   # charcoal blazer
+  - "#F1ECEA"   # background paper tone, matches site theme
+  - "#C9A227"   # warm gold jewelry accent (subtle)
+
+negative_prompt_seed:
+  - "no copying any real/identifiable person's face"
+  - "no celebrity likeness"
+  - "no cartoon, anime, or 3D-render style"
+  - "no uncanny/plastic AI-face artifacts"
+  - "no neon or cyberpunk lighting"
+  - "no exaggerated proportions"
+
+seed: null   # not yet rendered — no image-generation tool available in this session
+aspect_ratio: "3:4"
+model: "Flux / Midjourney v6 (recommended for photoreal editorial portraits) — not run in this session"

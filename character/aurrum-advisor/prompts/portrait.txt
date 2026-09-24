@@ -1,0 +1,11 @@
+Photorealistic editorial headshot/portrait photography, natural light, shallow depth of field, head-and-shoulders framing.
+
+Subject: original character — professional woman, late 30s, oval face, defined cheekbones, warm olive skin tone (#C98F61), dark brown shoulder-length hair with soft natural waves and a side part, hazel eyes with a direct, attentive expression, slight warm smile. Wearing a tailored charcoal blazer (#2A2A2E) over a white shirt, thin silver ring visible.
+
+Background: softly blurred warm off-white (#F1ECEA) modern office interior.
+
+Style: corporate editorial photography, muted neutral color grade, best quality, highly detailed, professional headshot, masterpiece.
+
+Negative prompt: cartoon, anime, 3D render, CGI, uncanny AI-face artifacts, plastic skin, neon lighting, celebrity likeness, copying any real/identifiable person.
+
+Aspect ratio: 4:5

@@ -1,0 +1,11 @@
+Photorealistic editorial full-body portrait photography, natural light, standing pose.
+
+Subject: original character — professional woman, late 30s, 5'7", straight confident posture, oval face, defined cheekbones, warm olive skin tone (#C98F61), dark brown shoulder-length wavy hair with side part, hazel eyes. Tailored charcoal blazer (#2A2A2E) over white shirt, dark trousers, thin silver ring on right hand, one hand gesturing open-palm as if mid-explanation.
+
+Background: modern glass office interior, warm off-white tones (#F1ECEA), soft depth of field.
+
+Style: corporate editorial photography, muted neutral color grade, best quality, highly detailed, professional, masterpiece.
+
+Negative prompt: cartoon, anime, 3D render, CGI, uncanny AI-face artifacts, plastic skin, neon lighting, celebrity likeness, copying any real/identifiable person, exaggerated proportions.
+
+Aspect ratio: 3:4

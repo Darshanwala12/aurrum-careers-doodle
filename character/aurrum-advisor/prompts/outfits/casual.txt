@@ -1,0 +1,5 @@
+Casual/off-duty outfit variant — photorealistic editorial photography.
+
+Soft knit sweater in a muted warm neutral tone, relaxed but tidy, minimal silver jewelry (thin ring on right hand), hair the same natural wave and side part. Reads as approachable, not corporate — for a "human moment" scene if the site ever wants a warmer, less formal beat.
+
+Same subject and facial features as consistency.yaml. Negative prompt: no logos, no cartoon/anime/3D-render style, no celebrity likeness.

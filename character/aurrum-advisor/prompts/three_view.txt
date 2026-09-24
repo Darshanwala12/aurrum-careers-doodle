@@ -1,0 +1,13 @@
+Photorealistic editorial portrait photography, natural window light, shallow depth of field.
+
+Subject: original character, professional woman, late 30s, oval face, defined cheekbones, warm olive skin tone (#C98F61), dark brown shoulder-length hair with soft natural waves and a side part, hazel eyes, direct and attentive expression, 5'7", straight confident posture, tailored charcoal blazer (#2A2A2E) over a white shirt, thin silver ring on right hand.
+
+Pose: three-view character turntable (front, 3/4 side, back), neutral confident expression, standing.
+
+Background: clean neutral grey-white studio background OR softly blurred modern glass office interior with warm off-white tones (#F1ECEA) — pick one consistently.
+
+Style: corporate editorial photography, muted neutral color grade, best quality, highly detailed, professional, masterpiece.
+
+Negative prompt: cartoon, anime, 3D render, CGI, uncanny AI-face artifacts, plastic skin, neon lighting, cyberpunk, exaggerated proportions, celebrity likeness, copying any real/identifiable person.
+
+Aspect ratio: 3:4
