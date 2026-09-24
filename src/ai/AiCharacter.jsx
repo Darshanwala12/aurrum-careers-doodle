@@ -78,7 +78,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const state = inConversation ? ai.characterState : scene.state;
 
   // VOICE → UNDERSTANDING → VISUAL RESPONSE: softly activate the related
-  // existing section while it's being explained. Never scrolls on its own.
+  // existing section while it's being explained.
   const section = showAnswer ? ai.current?.section : null;
   useEffect(() => {
     if (!section || ai.status !== 'speaking') return;
@@ -87,6 +87,15 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
     el.classList.add(HIGHLIGHT_CLASS);
     return () => el.classList.remove(HIGHLIGHT_CLASS);
   }, [section, ai.status]);
+
+  // Jump to the relevant content automatically as soon as the answer names
+  // one — the character explains while the page brings that section into
+  // view, rather than making the visitor click "Show me" every time.
+  useEffect(() => {
+    if (!ai.current?.section) return;
+    scrollToId(ai.current.section);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ai.current]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;

@@ -187,10 +187,14 @@ p { color: var(--muted); margin: 0 0 1rem; }
 
 .story__avatar-col { position: relative; min-width: 0; }
 @media (min-width: 900px) {
+  /* Character on the right, content scrolls on the left — `order` swaps the
+     visual position without touching source order (keeps DOM/tab order
+     content-first, which is also the more sensible reading order). */
   .story__avatar-col {
     position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
-    display: flex; overflow: hidden;
+    display: flex; overflow: hidden; order: 2;
   }
+  .story__track { order: 1; }
 }
 
 .companion-stage {

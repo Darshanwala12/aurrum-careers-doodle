@@ -58,31 +58,36 @@ function plan(text, fromWord = 0, msPerWord = null) {
   return out;
 }
 
-// Model materials are texture-based with a white base color (full
-// pass-through), so a tint alone can't turn a blue-printed texture white —
-// multiply only darkens/shifts a texture's existing hue. Drop the map and
-// use a flat color instead. Named per the mesh names actually present in
-// elena.glb (checked via the GLB's JSON chunk).
+// Realistic color direction (client-specified palette). Two strategies per
+// material, named per the mesh names actually present in elena.glb (checked
+// via the GLB's JSON chunk):
+//  - 'flatten': drop the texture map and use a flat color. Needed wherever
+//    the base color is already white (full pass-through) — a tint can only
+//    ever darken/shift a texture's existing hue, it can never desaturate a
+//    colored print to something else (e.g. the old blue gym-tee texture).
+//  - 'tint': keep the texture (skin shading/detail matters) and multiply it
+//    by a color — shifts tone/warmth without flattening the surface.
 const RECOLOR = {
-  'Human.female_casualsuit01': 0xf1ece5, // random gym-tee texture → Elena's cream/white blazer tone
+  'Human.female_casualsuit01': { mode: 'flatten', hex: 0x1c1e20 }, // blazer → charcoal black
+  'Human.ponytail01': { mode: 'flatten', hex: 0x241c19 }, // hair → deep natural brown
+  'Human.body': { mode: 'tint', hex: 0xc98f72 }, // skin → warm medium-light beige
+  'Human.high-poly': { mode: 'tint', hex: 0xc98f72 }, // face → same skin tone
+  'Human.mindfront_eyebrows_02': { mode: 'flatten', hex: 0x352722 }, // eyebrows → dark brown
 };
+// Not targetable: iris/lip color are baked into the face texture with no
+// separate material to select, so they can't be recolored without editing
+// the texture image itself — out of scope for a runtime material tint.
 function recolor(scene) {
   if (!scene) return;
   scene.traverse((obj) => {
     if (!obj.isMesh || !obj.material) return;
     const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
     mats.forEach((m) => {
-      const hex = RECOLOR[m.name];
-      if (hex != null && m.color) {
-        // The base color is white (full pass-through), so the blue comes
-        // from the texture itself — a tint can only ever darken/shift a
-        // texture's existing hue, never desaturate it to white. Drop the
-        // map so the flat `color` actually shows, instead of multiplying
-        // an unrelated tint onto a blue print that stays visibly blue.
-        m.map = null;
-        m.color.setHex(hex);
-        m.needsUpdate = true;
-      }
+      const spec = RECOLOR[m.name];
+      if (!spec || !m.color) return;
+      if (spec.mode === 'flatten') m.map = null;
+      m.color.setHex(spec.hex);
+      m.needsUpdate = true;
     });
   });
 }
