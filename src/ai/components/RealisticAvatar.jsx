@@ -58,6 +58,35 @@ function plan(text, fromWord = 0, msPerWord = null) {
   return out;
 }
 
+// Model materials are texture-based with a white base color (full
+// pass-through), so a tint alone can't turn a blue-printed texture white —
+// multiply only darkens/shifts a texture's existing hue. Drop the map and
+// use a flat color instead. Named per the mesh names actually present in
+// elena.glb (checked via the GLB's JSON chunk).
+const RECOLOR = {
+  'Human.female_casualsuit01': 0xf1ece5, // random gym-tee texture → Elena's cream/white blazer tone
+};
+function recolor(scene) {
+  if (!scene) return;
+  scene.traverse((obj) => {
+    if (!obj.isMesh || !obj.material) return;
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+    mats.forEach((m) => {
+      const hex = RECOLOR[m.name];
+      if (hex != null && m.color) {
+        // The base color is white (full pass-through), so the blue comes
+        // from the texture itself — a tint can only ever darken/shift a
+        // texture's existing hue, never desaturate it to white. Drop the
+        // map so the flat `color` actually shows, instead of multiplying
+        // an unrelated tint onto a blue print that stays visibly blue.
+        m.map = null;
+        m.color.setHex(hex);
+        m.needsUpdate = true;
+      }
+    });
+  });
+}
+
 export default function RealisticAvatar({ state = STATES.IDLE, speaking = false, text = '', onReady, onError }) {
   const nodeRef = useRef(null);
   const headRef = useRef(null);
@@ -98,6 +127,7 @@ export default function RealisticAvatar({ state = STATES.IDLE, speaking = false,
     head.showAvatar({ url: AVATAR_URL, body: 'F', avatarMood: 'neutral', lipsyncLang: 'en' })
       .then(() => {
         if (disposed) return;
+        recolor(head.scene);
         setReady(true);
         onReady?.();
       })
