@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 import { useNarration } from '../avatar/useNarration.js';
 import { scrollToId } from '../animations/useSmoothScroll.js';
 import { useAiCharacter } from './useAiCharacter.js';
@@ -12,10 +11,10 @@ import ThoughtDoodles from './components/ThoughtDoodles.jsx';
 
 // three.js + TalkingHead (~700 KB) load in their own chunk after the panel is up.
 const RealisticAvatar = lazy(() => import('./components/RealisticAvatar.jsx'));
-// The illustrated Elena is the default. Set VITE_AURRUM_AVATAR=3d to use the
-// TalkingHead 3D model instead (needs a better .glb than the current CC0 one).
-const USE_3D = import.meta.env.VITE_AURRUM_AVATAR === '3d';
-const webglOK = USE_3D && (() => {
+// The 3D model (public/avatars/elena.glb) is the avatar everywhere now.
+// WebGL is still required to render it — on a browser without WebGL there is
+// no way to show it, so that one case keeps the illustrated SVG as a floor.
+const webglOK = (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
   catch { return false; }
 })();
@@ -164,10 +163,12 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Live video of Elena, your Aurrum career advisor"
           />
         )}
-        {/* Illustrated Elena: the default character (also the 3D mode's loading/no-WebGL fallback). */}
+        {/* While the 3D model loads (or on the rare browser with no WebGL at
+            all), show a neutral placeholder rather than the old illustration —
+            the 3D avatar is what's meant to be shown everywhere now. */}
         {avatar3d !== 'ready' && !live.isLive && (
-          <div className="aurrum-ai-character__fallback">
-            <DoodleCompanion state={state} speaking={speaking && !paused} size={size} text={lineText} />
+          <div className="aurrum-ai-character__fallback aurrum-ai-character__fallback--placeholder" style={{ width: size, height: size }} aria-hidden="true">
+            <span className="aurrum-ai-character__fallback-pulse" />
           </div>
         )}
         <svg className="aurrum-ai-character__accent" viewBox="0 0 60 30" aria-hidden="true">
@@ -307,7 +308,15 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           aria-label="Open conversation with Elena"
           aria-expanded={expanded}
         >
-          <DoodleCompanion state={state} speaking={speaking && !paused} size={40} />
+          {webglOK ? (
+            <div className="aurrum-ai-character__bar-avatar">
+              <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
+                <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} />
+              </Suspense>
+            </div>
+          ) : (
+            <span className="aurrum-ai-character__fallback-pulse" />
+          )}
         </button>
         {captionsOn && (
           <p className="aurrum-ai-character__bar-caption" aria-live="polite">

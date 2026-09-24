@@ -38,6 +38,21 @@
 /* Shift the character left when a doodle object is beside it, so it can point at it. */
 .aurrum-ai-character__stage:has(.aurrum-ai-character__doodle) .aurrum-ai-character__avatar { transform: translateX(-24%); }
 
+/* Neutral loading placeholder — shown only until the 3D model is ready, or
+   on the rare browser with no WebGL at all. No character illustration. */
+.aurrum-ai-character__fallback--placeholder { align-items: center; border-radius: 999px; overflow: hidden; }
+.aurrum-ai-character__fallback-pulse {
+  display: block; width: 60%; height: 60%; margin: auto; border-radius: 999px;
+  background: radial-gradient(circle, rgba(221, 87, 48, 0.25), rgba(221, 87, 48, 0.05) 70%);
+  animation: aurrum-pulse 1.6s ease-in-out infinite;
+}
+@keyframes aurrum-pulse { 0%, 100% { opacity: 0.5; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1); } }
+
+/* Mobile compact bar: the 3D canvas at icon size (replaces the old SVG icon). */
+.aurrum-ai-character__bar-avatar { position: relative; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+.aurrum-ai-character__bar-avatar .aurrum-ai-character__3d { position: absolute; inset: 0; opacity: 1; }
+.aurrum-ai-character__bar-avatar .aurrum-ai-character__3d canvas { width: 100% !important; height: 100% !important; }
+
 .aurrum-ai-character__accent {
   position: absolute; left: -26px; top: 12%; width: 42px; color: var(--accent);
   fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round;

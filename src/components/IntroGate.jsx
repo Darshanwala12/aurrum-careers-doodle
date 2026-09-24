@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 import { useNarration } from '../avatar/useNarration.js';
 import { personas } from '../data/scenes.js';
+
+const RealisticAvatar = lazy(() => import('../ai/components/RealisticAvatar.jsx'));
+const webglOK = (() => {
+  try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
+  catch { return false; }
+})();
 
 const LINE_1 = "Hi. I'm Elena.";
 const LINE_2 = "Tell me where you are in your career, and I'll show you where we can help.";
@@ -47,7 +52,15 @@ export default function IntroGate({ onDone }) {
           <img src="/brand/aurrum-logo-dark.webp" alt="Aurrum Careers" className="logo-chip__img logo-chip__img--dark" />
       </div>
       <div className="intro-gate__figure">
-        <DoodleCompanion state="greeting" speaking={speaking} size={200} />
+        {webglOK ? (
+          <div className="aurrum-ai-character__avatar is-3d is-ready">
+            <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
+              <RealisticAvatar state="greeting" speaking={speaking} text={displayed} />
+            </Suspense>
+          </div>
+        ) : (
+          <span className="aurrum-ai-character__fallback-pulse" />
+        )}
       </div>
       <p className="intro-gate__caption" aria-live="polite">{displayed}</p>
 

@@ -120,6 +120,11 @@ p { color: var(--muted); margin: 0 0 1rem; }
 @media (min-width: 1600px) {
   .intro-gate__brand { padding-left: max(3rem, calc((100vw - 1800px) / 2)); }
 }
+/* Explicit size: the 3D avatar's canvas is position:absolute inside this box,
+   so — unlike the old inline SVG, which sized itself intrinsically — the box
+   needs its own dimensions or the canvas collapses to 0x0. */
+.intro-gate__figure { position: relative; height: 260px; display: flex; justify-content: center; }
+.intro-gate__figure .aurrum-ai-character__avatar { height: 100%; max-height: none; }
 .intro-gate__caption { font-family: var(--font-display); font-size: clamp(1.1rem, 3vw, 1.6rem); max-width: 30ch; color: var(--ink); min-height: 2.4em; }
 .intro-gate__actions { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; animation: fade-up 0.5s var(--ease); }
 .intro-gate__personas { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; max-width: 480px; }
