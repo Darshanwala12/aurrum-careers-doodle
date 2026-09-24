@@ -346,9 +346,9 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
           <stop offset="100%" stopColor="#261710" />
         </linearGradient>
         <linearGradient id={id('blazer')} x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0%" stopColor="#15667a" />
-          <stop offset="55%" stopColor="#0f5364" />
-          <stop offset="100%" stopColor="#0a3e4b" />
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="55%" stopColor="#f1ecea" />
+          <stop offset="100%" stopColor="#dcd5d0" />
         </linearGradient>
         <radialGradient id={id('iris')} cx="45%" cy="40%" r="62%">
           <stop offset="0%" stopColor="#9a6a42" />
@@ -389,12 +389,12 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         <path d="M 34 320 Q 36 246 64 227 Q 84 216 100 216 Q 116 216 136 227 Q 164 246 166 320 Z" fill={url('blazer')} />
         <g clipPath={url('body-clip')}>
           {/* gouache shading: shoulders, side folds, under-lapel shadow */}
-          <g filter={url('wash')} opacity="0.55">
-            <path d="M 34 260 Q 46 236 66 230 Q 52 262 50 320 L 34 320 Z" fill="#082f3a" />
-            <path d="M 166 260 Q 154 236 134 230 Q 148 262 150 320 L 166 320 Z" fill="#082f3a" />
-            <path d="M 70 236 Q 86 262 96 300 L 88 304 Q 78 268 66 244 Z" fill="#093744" opacity="0.7" />
+          <g filter={url('wash')} opacity="0.4">
+            <path d="M 34 260 Q 46 236 66 230 Q 52 262 50 320 L 34 320 Z" fill="#b9b0a8" />
+            <path d="M 166 260 Q 154 236 134 230 Q 148 262 150 320 L 166 320 Z" fill="#b9b0a8" />
+            <path d="M 70 236 Q 86 262 96 300 L 88 304 Q 78 268 66 244 Z" fill="#c7bfb8" opacity="0.7" />
           </g>
-          <path d="M 70 234 Q 64 246 60 262" fill="none" stroke="#5fa6b5" strokeWidth="1.4" opacity="0.35" strokeLinecap="round" />
+          <path d="M 70 234 Q 64 246 60 262" fill="none" stroke="#fff" strokeWidth="1.4" opacity="0.5" strokeLinecap="round" />
           {grain && <rect x="30" y="210" width="140" height="110" fill={url('grain')} opacity="0.9" />}
         </g>
         {/* blouse */}
@@ -402,11 +402,11 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         <path d="M 86 219 Q 100 238 114 219" fill="none" stroke="#d9cbbb" strokeWidth="1.4" />
         <path d="M 96 244 Q 100 250 104 244" fill="none" stroke="#d9cbbb" strokeWidth="1" />
         {/* lapels */}
-        <path d="M 80 219 L 100 268 L 90 283 L 69 236 Q 72 226 80 219 Z" fill="#0c4a59" />
-        <path d="M 120 219 L 100 268 L 110 283 L 131 236 Q 128 226 120 219 Z" fill="#0c4a59" />
-        <path d="M 74 232 L 90 283 M 126 232 L 110 283" stroke="#1b7487" strokeWidth="0.9" opacity="0.6" />
+        <path d="M 80 219 L 100 268 L 90 283 L 69 236 Q 72 226 80 219 Z" fill="#eae4df" />
+        <path d="M 120 219 L 100 268 L 110 283 L 131 236 Q 128 226 120 219 Z" fill="#eae4df" />
+        <path d="M 74 232 L 90 283 M 126 232 L 110 283" stroke="#fff" strokeWidth="0.9" opacity="0.7" />
         {/* button + pocket */}
-        <circle cx="100" cy="296" r="2.3" fill="#0a3e4b" stroke={INK} strokeWidth="0.6" />
+        <circle cx="100" cy="296" r="2.3" fill="#eae4df" stroke={INK} strokeWidth="0.6" />
         <path d="M 118 300 L 140 298" stroke={INK} strokeWidth="0.9" opacity="0.6" strokeLinecap="round" />
         {/* gold pin */}
         <circle cx="122" cy="247" r="3.1" fill="#c9994a" stroke="#8a6326" strokeWidth="0.6" />
@@ -505,6 +505,17 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         <path d="M 102 118 Q 103 127 104.5 132" fill="none" stroke="#fff" strokeWidth="1.3" opacity="0.3" strokeLinecap="round" />
         {/* philtrum */}
         <path d="M 98.2 140.5 L 98.8 143.6 M 101.8 140.5 L 101.2 143.6" stroke="#b67a5c" strokeWidth="0.7" opacity="0.6" />
+
+        {/* glasses — round wire frames */}
+        <g fill="none" stroke="#2a2118" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.92">
+          <circle cx="80" cy="112" r="14.5" />
+          <circle cx="120" cy="112" r="14.5" />
+          <path d="M 94.5 111 Q 100 107.5 105.5 111" />
+          <path d="M 65.5 110 L 58 107" />
+          <path d="M 134.5 110 L 142 107" />
+        </g>
+        <circle cx="80" cy="112" r="14.5" fill="#fff" opacity="0.05" />
+        <circle cx="120" cy="112" r="14.5" fill="#fff" opacity="0.05" />
 
         {/* mouth: dark interior + teeth (clipped to the mouth shape) + lips */}
         <path ref={mouthRef} d={rest.d} fill="#5e1f28" stroke={url('lip')} strokeWidth="3.4" strokeLinejoin="round" />
