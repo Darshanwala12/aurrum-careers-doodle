@@ -55,7 +55,7 @@ export default function IntroGate({ onDone }) {
         {webglOK ? (
           <div className="aurrum-ai-character__avatar is-3d is-ready">
             <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
-              <RealisticAvatar state="greeting" speaking={speaking} text={displayed} />
+              <RealisticAvatar state="greeting" speaking={speaking} text={displayed} cameraView="upper" />
             </Suspense>
           </div>
         ) : (

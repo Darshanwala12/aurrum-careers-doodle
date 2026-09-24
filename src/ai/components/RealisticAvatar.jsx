@@ -92,7 +92,11 @@ function recolor(scene) {
   });
 }
 
-export default function RealisticAvatar({ state = STATES.IDLE, speaking = false, text = '', onReady, onError }) {
+// Valid TalkingHead views, widest to tightest: 'full' (full body — desktop
+// story/chat), 'mid' (half body — mobile chat sheet), 'upper' (chest up),
+// 'head' (headshot — launcher/thumbnail icon sizes where anything wider is
+// wasted pixels).
+export default function RealisticAvatar({ state = STATES.IDLE, speaking = false, text = '', cameraView = 'full', onReady, onError }) {
   const nodeRef = useRef(null);
   const headRef = useRef(null);
   const [ready, setReady] = useState(false);
@@ -108,7 +112,7 @@ export default function RealisticAvatar({ state = STATES.IDLE, speaking = false,
         ttsEndpoint: null,
         lipsyncModules: [],         // loaded manually below (its dynamic import breaks under bundlers)
         lipsyncLang: 'en',
-        cameraView: 'upper',
+        cameraView,
         cameraRotateEnable: false,
         cameraZoomEnable: false,
         cameraPanEnable: false,
@@ -170,6 +174,14 @@ export default function RealisticAvatar({ state = STATES.IDLE, speaking = false,
     head.speakAudio({ audio, words: p.words, wtimes: p.wtimes, wdurations: p.wdurations });
     syncRef.current = { ...syncRef.current, text, start: performance.now(), plan: p, from: fromWord };
   };
+
+  // Framing can change without remounting (e.g. the same panel switching
+  // between mobile and desktop breakpoints) — retarget the existing camera.
+  useEffect(() => {
+    const head = headRef.current;
+    if (!ready || !head) return;
+    head.setView(cameraView);
+  }, [cameraView, ready]);
 
   // Captions-only speech (muted, or scene narration): match the caption pace.
   useEffect(() => {

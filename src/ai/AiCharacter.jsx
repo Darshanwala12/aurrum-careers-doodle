@@ -148,6 +148,9 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const followups = showAnswer && ai.current?.followups?.length ? ai.current.followups : SUGGESTED_PROMPTS;
   const busy = ai.status === 'speaking' || ai.status === 'thinking';
 
+  // Desktop: full body, as the primary visual of the panel. Mobile chat
+  // sheet: half body ('mid') — full body would be mostly empty space in a
+  // narrow phone-width column, and would risk cropping into the composer.
   const figure = (size) => (
     <div className={`aurrum-ai-character__stage aurrum-ai-character__stage--${ai.status}`}>
       <div className={`aurrum-ai-character__avatar ${webglOK && avatar3d !== 'failed' ? 'is-3d' : ''} ${avatar3d === 'ready' ? 'is-ready' : ''} ${live.isLive ? 'is-live' : ''}`}>
@@ -157,6 +160,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
               state={state}
               speaking={speaking && !paused}
               text={lineText}
+              cameraView={compact ? 'mid' : 'full'}
               onReady={() => setAvatar3d('ready')}
               onError={(err) => { console.warn('[Elena 3D] falling back to illustration:', err); setAvatar3d('failed'); }}
             />
@@ -311,24 +315,32 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   if (compact) {
     return (
       <>
-        <button
-          type="button"
-          className="aurrum-ai-character__launcher"
-          onClick={() => setExpanded(true)}
-          aria-label="Talk to Elena, your Aurrum career advisor"
-          aria-expanded={expanded}
-        >
-          {webglOK ? (
-            <div className="aurrum-ai-character__bar-avatar">
-              <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
-                <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} />
-              </Suspense>
-            </div>
-          ) : (
-            <span className="aurrum-ai-character__fallback-pulse" />
-          )}
-          {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
-        </button>
+        {/* Portaled to <body> — `.companion-stage` has backdrop-filter,
+            which (like `transform`) creates a new containing block for
+            position:fixed descendants. Left in place, the launcher was
+            anchoring to that top bar instead of the viewport, so "bottom"
+            landed near the top of the screen instead of the actual bottom. */}
+        {createPortal(
+          <button
+            type="button"
+            className="aurrum-ai-character__launcher"
+            onClick={() => setExpanded(true)}
+            aria-label="Talk to Elena, your Aurrum career advisor"
+            aria-expanded={expanded}
+          >
+            {webglOK ? (
+              <div className="aurrum-ai-character__bar-avatar">
+                <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
+                  <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} cameraView="head" />
+                </Suspense>
+              </div>
+            ) : (
+              <span className="aurrum-ai-character__fallback-pulse" />
+            )}
+            {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
+          </button>,
+          document.body
+        )}
 
         {expanded && createPortal(
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
@@ -337,7 +349,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
                 {webglOK ? (
                   <div className="aurrum-ai-character__bar-avatar">
                     <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
-                      <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} />
+                      <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} cameraView="head" />
                     </Suspense>
                   </div>
                 ) : (
