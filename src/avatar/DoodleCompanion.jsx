@@ -3,57 +3,51 @@ import gsap from 'gsap';
 import { resolveState } from './stateMap.js';
 import { speechEvents } from '../ai/voiceAdapter.js';
 
-// ---------- Mouth ----------
-const CY = 147;
+// ── Mouth / viseme ────────────────────────────────────────────────────
+const MY = 148;
 const mouthPath = (w, lift, top, bottom) =>
-  `M ${100 - w} ${CY - lift} Q 100 ${CY + lift * 0.5 - 1 - top} ${100 + w} ${CY - lift} Q 100 ${CY + lift * 0.5 + 2 + bottom} ${100 - w} ${CY - lift} Z`;
+  `M ${100 - w} ${MY - lift} Q 100 ${MY + lift * 0.5 - 1 - top} ${100 + w} ${MY - lift} Q 100 ${MY + lift * 0.5 + 2 + bottom} ${100 - w} ${MY - lift} Z`;
 
 const REST = {
-  friendly:   [14.5, 3.4, 1.6], explaining: [14, 2.2, 1.4], concerned: [12, -1.6, 1.3],
-  confident:  [15, 3.2, 1.4],   calm:       [13, 1.8, 1.4],  motivating: [16.5, 4.4, 3.5],
-  curious:    [11.5, 1.2, 1.4], serious:    [13, 0, 1],       surprised:  [7.5, 0, 6.5],
+  friendly: [14.5, 3.4, 1.6], explaining: [14, 2.2, 1.4], concerned: [12, -1.6, 1.3],
+  confident: [15, 3.2, 1.4], calm: [13, 1.8, 1.4], motivating: [16.5, 4.4, 3.5],
+  curious: [11.5, 1.2, 1.4], serious: [13, 0, 1], surprised: [7.5, 0, 6.5],
 };
 const VISEME = {
-  sil: null,
-  PP:  [13, 0, 0.4],
-  FF:  [13, 0, 3.2],
-  nn:  [13, 0.5, 3.5],
-  aa:  [12.5, 2, 10],
-  E:   [15.5, 1, 5],
-  O:   [9, 2.5, 8.5],
-  U:   [6.5, 1.8, 5.5],
+  sil: null, PP: [13, 0, 0.4], FF: [13, 0, 3.2], nn: [13, 0.5, 3.5],
+  aa: [12.5, 2, 10], E: [15.5, 1, 5], O: [9, 2.5, 8.5], U: [6.5, 1.8, 5.5],
 };
 function visemeFor(v, expr) {
   const [rw, lift, rb] = REST[expr] ?? REST.friendly;
   const s = VISEME[v];
   if (!s) return { d: mouthPath(rw, lift, 0, rb), teeth: 0 };
   const smile = Math.max(0, lift) * 0.5;
-  return { d: mouthPath(s[0], smile, s[1], s[2]), teeth: v === 'aa' || v === 'E' || v === 'FF' || v === 'nn' ? 1 : v === 'O' ? 0.5 : 0 };
+  return { d: mouthPath(s[0], smile, s[1], s[2]), teeth: ['aa','E','FF','nn'].includes(v) ? 1 : v === 'O' ? 0.5 : 0 };
 }
 function wordVisemes(word) {
   const out = [];
   for (const ch of word.toLowerCase().replace(/[^a-z]/g, '')) {
-    const v = 'a'.includes(ch) ? 'aa' : 'eiy'.includes(ch) ? 'E' : ch === 'o' ? 'O' : 'uwq'.includes(ch) ? 'U'
-      : 'mbp'.includes(ch) ? 'PP' : 'fv'.includes(ch) ? 'FF' : 'nn';
+    const v = 'a'.includes(ch) ? 'aa' : 'eiy'.includes(ch) ? 'E' : ch === 'o' ? 'O'
+      : 'uwq'.includes(ch) ? 'U' : 'mbp'.includes(ch) ? 'PP' : 'fv'.includes(ch) ? 'FF' : 'nn';
     if (out[out.length - 1] !== v) out.push(v);
   }
   return out.slice(0, 7).length ? out.slice(0, 7) : ['nn'];
 }
 
-// ---------- Eyebrows ----------
-const EYEBROW = {
-  friendly:   { l: 'M 62 92 Q 74 86 86 91',  r: 'M 114 91 Q 126 86 138 92' },
-  explaining: { l: 'M 62 90 Q 74 83 86 89',  r: 'M 114 89 Q 126 83 138 90' },
-  concerned:  { l: 'M 62 88 Q 74 94 86 90',  r: 'M 114 90 Q 126 94 138 88' },
-  confident:  { l: 'M 62 89 Q 76 82 88 88',  r: 'M 112 88 Q 124 82 138 89' },
-  calm:       { l: 'M 62 91 Q 74 88 86 91',  r: 'M 114 91 Q 126 88 138 91' },
-  motivating: { l: 'M 60 87 Q 76 79 88 87',  r: 'M 112 87 Q 124 79 140 87' },
-  curious:    { l: 'M 62 89 Q 72 80 84 90',  r: 'M 116 90 Q 128 80 138 89' },
-  serious:    { l: 'M 62 90 Q 74 87 86 90',  r: 'M 114 90 Q 126 87 138 90' },
-  surprised:  { l: 'M 60 84 Q 74 76 88 84',  r: 'M 112 84 Q 126 76 140 84' },
+// ── Eyebrows ──────────────────────────────────────────────────────────
+const BROW = {
+  friendly:   { l: 'M 64 97 Q 76 91 90 95',  r: 'M 110 95 Q 124 91 136 97' },
+  explaining: { l: 'M 64 95 Q 76 88 90 93',  r: 'M 110 93 Q 124 88 136 95' },
+  concerned:  { l: 'M 64 93 Q 76 99 90 94',  r: 'M 110 94 Q 124 99 136 93' },
+  confident:  { l: 'M 65 94 Q 78 87 91 93',  r: 'M 109 93 Q 122 87 135 94' },
+  calm:       { l: 'M 64 96 Q 76 92 90 96',  r: 'M 110 96 Q 124 92 136 96' },
+  motivating: { l: 'M 62 93 Q 76 85 90 91',  r: 'M 110 91 Q 124 85 138 93' },
+  curious:    { l: 'M 65 93 Q 74 84 88 93',  r: 'M 112 93 Q 126 84 135 93' },
+  serious:    { l: 'M 64 95 Q 76 92 90 95',  r: 'M 110 95 Q 124 92 136 95' },
+  surprised:  { l: 'M 62 90 Q 76 81 90 88',  r: 'M 110 88 Q 124 81 138 90' },
 };
 
-// ---------- Arms ----------
+// ── Arm poses ─────────────────────────────────────────────────────────
 const ARM_HIDDEN = { rotate: 24, opacity: 0 };
 const ARM_POSE = {
   wave:          { rotate: -62, opacity: 1 },
@@ -63,101 +57,81 @@ const ARM_POSE = {
   'point-down':  { rotate: 22,  opacity: 1 },
   explain:       { rotate: -30, opacity: 1 },
   thumb:         { rotate: -48, opacity: 1 },
-  chin:          { rotate: -114, opacity: 1 },
+  chin:          { rotate: -114,opacity: 1 },
   none:          ARM_HIDDEN,
 };
 const HAND_FOR = {
-  wave: 'wave', 'point-right': 'point', 'point-left': 'point', 'point-up': 'point', 'point-down': 'point',
-  explain: 'open', thumb: 'thumb', chin: 'fist', none: 'open',
+  wave: 'wave', 'point-right': 'point', 'point-left': 'point',
+  'point-up': 'point', 'point-down': 'point', explain: 'open',
+  thumb: 'thumb', chin: 'fist', none: 'relaxed',
 };
-
-// ---------- Pencil grain (once, shared) ----------
-let grainURL = null;
-function getGrain() {
-  if (grainURL || typeof document === 'undefined') return grainURL;
-  const c = document.createElement('canvas');
-  c.width = c.height = 96;
-  const ctx = c.getContext('2d');
-  const img = ctx.createImageData(96, 96);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = Math.random() * 255;
-    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-    img.data[i + 3] = Math.random() < 0.5 ? 22 : 0;
-  }
-  ctx.putImageData(img, 0, 0);
-  grainURL = c.toDataURL();
-  return grainURL;
-}
-
-const INK = '#2c1c0f';
 
 export default function DoodleCompanion({ state = 'idle', speaking = false, size = 260, text = '' }) {
   const { expression, arm } = resolveState(state);
   const uid = useId().replace(/:/g, '');
-  const id  = (n) => `${uid}-${n}`;
-  const url = (n) => `url(#${id(n)})`;
+  const id  = n => `${uid}-${n}`;
+  const url = n => `url(#${id(n)})`;
 
-  const svgRef      = useRef(null);
-  const mouthRef    = useRef(null);
-  const mouthClipRef= useRef(null);
-  const teethRef    = useRef(null);
-  const browLRef    = useRef(null);
-  const browRRef    = useRef(null);
-  const eyesRef     = useRef(null);
-  const headRef     = useRef(null);
-  const torsoRef    = useRef(null);
-  const armRRef     = useRef(null);
-  const armLRef     = useRef(null);
-  const pupilsRef   = useRef(null);
-  const browsRef    = useRef(null);
-  const wristRRef   = useRef(null);
-  const wristLRef   = useRef(null);
+  const svgRef       = useRef(null);
+  const mouthRef     = useRef(null);
+  const mouthClipRef = useRef(null);
+  const teethRef     = useRef(null);
+  const browLRef     = useRef(null);
+  const browRRef     = useRef(null);
+  const eyesRef      = useRef(null);
+  const headRef      = useRef(null);
+  const torsoRef     = useRef(null);
+  const armRRef      = useRef(null);
+  const armLRef      = useRef(null);
+  const pupilsRef    = useRef(null);
+  const browsRef     = useRef(null);
+  const wristRRef    = useRef(null);
+  const wristLRef    = useRef(null);
 
-  const exprRef = useRef(expression);
-  exprRef.current = expression;
-  const textRef = useRef(text);
-  textRef.current = text;
+  const exprRef = useRef(expression); exprRef.current = expression;
+  const textRef = useRef(text);       textRef.current = text;
   const listening = state === 'listening';
   const thinking  = state === 'thinking';
-  const handKind  = HAND_FOR[arm] ?? 'open';
+  const handKind  = HAND_FOR[arm] ?? 'relaxed';
 
   const setMouth = (v, dur = 0.08) => {
     const m = visemeFor(v, exprRef.current);
-    if (mouthRef.current)     gsap.to([mouthRef.current, mouthClipRef.current], { attr: { d: m.d }, duration: dur, ease: 'power1.out', overwrite: 'auto' });
-    if (teethRef.current)     gsap.to(teethRef.current,  { opacity: m.teeth, duration: dur, overwrite: 'auto' });
+    if (mouthRef.current)
+      gsap.to([mouthRef.current, mouthClipRef.current], { attr: { d: m.d }, duration: dur, ease: 'power1.out', overwrite: 'auto' });
+    if (teethRef.current)
+      gsap.to(teethRef.current, { opacity: m.teeth, duration: dur, overwrite: 'auto' });
   };
 
   // Blink
   useEffect(() => {
-    let cancelled = false; let t;
+    let t; let dead = false;
     const blink = () => {
-      if (cancelled || !eyesRef.current) return;
+      if (dead || !eyesRef.current) return;
       gsap.to(eyesRef.current, { scaleY: 0.06, duration: 0.065, transformOrigin: 'center', yoyo: true, repeat: 1, ease: 'power1.inOut' });
-      t = setTimeout(blink, Math.random() < 0.18 ? 240 : 2000 + Math.random() * 3400);
+      t = setTimeout(blink, Math.random() < 0.18 ? 240 : 2200 + Math.random() * 3400);
     };
-    t = setTimeout(blink, 800);
-    return () => { cancelled = true; clearTimeout(t); };
+    t = setTimeout(blink, 900);
+    return () => { dead = true; clearTimeout(t); };
   }, []);
 
-  // Idle: gentle head sway + breathing torso
+  // Idle breathing + head sway
   useEffect(() => {
     if (!headRef.current || !torsoRef.current) return;
-    const head   = gsap.to(headRef.current,  { rotate: 1.6,  svgOrigin: '100 190', duration: 3.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    const breath = gsap.to(torsoRef.current, { scaleY: 1.013, svgOrigin: '100 320', duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    // Subtle weight-shift: slight left-right swing on torso
-    const sway   = gsap.to(torsoRef.current, { rotate: 0.5, svgOrigin: '100 320', duration: 4.2, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.9 });
-    return () => { head.kill(); breath.kill(); sway.kill(); };
+    const h = gsap.to(headRef.current,  { rotate: 1.5,   svgOrigin: '100 200', duration: 3.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    const b = gsap.to(torsoRef.current, { scaleY: 1.013,  svgOrigin: '100 260', duration: 2.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    const s = gsap.to(torsoRef.current, { rotate: 0.45,   svgOrigin: '100 260', duration: 4.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.1 });
+    return () => { h.kill(); b.kill(); s.kill(); };
   }, []);
 
-  // Expression: brows + resting mouth
+  // Expression → brows + resting mouth
   useEffect(() => {
-    const brow = EYEBROW[expression] ?? EYEBROW.friendly;
+    const brow = BROW[expression] ?? BROW.friendly;
     if (browLRef.current) gsap.to(browLRef.current, { attr: { d: brow.l }, duration: 0.45, ease: 'power2.out' });
     if (browRRef.current) gsap.to(browRRef.current, { attr: { d: brow.r }, duration: 0.45, ease: 'power2.out' });
     if (!speaking) setMouth('sil', 0.4);
-  }, [expression]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [expression]); // eslint-disable-line
 
-  // Arms: swing into pose, optional wrist oscillation while speaking
+  // Arms
   useEffect(() => {
     const useLeft = arm === 'point-left';
     const active  = useLeft ? armLRef  : armRRef;
@@ -165,80 +139,69 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
     const wActive = useLeft ? wristLRef : wristRRef;
     const wIdle   = useLeft ? wristRRef : wristLRef;
     if (!active.current || !idle.current) return;
-    const origin = (ref) => (ref === armLRef ? '62 228' : '138 228');
-    const mirror = (ref, p) => (ref === armLRef ? { ...p, rotate: -p.rotate } : p);
-    const pose = ARM_POSE[arm] ?? ARM_HIDDEN;
-    gsap.to(active.current, { ...mirror(active, pose), svgOrigin: origin(active), duration: 0.65, ease: 'back.out(1.6)' });
-    gsap.to(idle.current,   { ...mirror(idle, ARM_HIDDEN), svgOrigin: origin(idle), duration: 0.38, ease: 'power2.in' });
-    if (wIdle.current)  gsap.to(wIdle.current,  { rotate: 0, duration: 0.3 });
+    const orig   = ref => ref === armLRef ? '62 228' : '138 228';
+    const mirror = (ref, p) => ref === armLRef ? { ...p, rotate: -p.rotate } : p;
+    const pose   = ARM_POSE[arm] ?? ARM_HIDDEN;
+    gsap.to(active.current, { ...mirror(active, pose),    svgOrigin: orig(active), duration: 0.65, ease: 'back.out(1.6)' });
+    gsap.to(idle.current,   { ...mirror(idle, ARM_HIDDEN), svgOrigin: orig(idle),   duration: 0.38, ease: 'power2.in' });
+    if (wIdle.current) gsap.to(wIdle.current, { rotate: 0, duration: 0.3 });
 
-    let wave;
-    if (arm === 'wave') {
-      wave = gsap.to(active.current, { rotate: pose.rotate - 14, svgOrigin: origin(active), duration: 0.25, yoyo: true, repeat: 6, ease: 'sine.inOut', delay: 0.55 });
-    }
-
-    // Subtle wrist oscillation while arm is visible
-    let wrist;
-    if (pose.opacity === 1 && wActive.current) {
-      wrist = gsap.to(wActive.current, { rotate: 4, duration: 0.55, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.7 });
-    }
+    let wave, wrist;
+    if (arm === 'wave')
+      wave = gsap.to(active.current, { rotate: pose.rotate - 13, svgOrigin: orig(active), duration: 0.25, yoyo: true, repeat: 6, ease: 'sine.inOut', delay: 0.55 });
+    if (pose.opacity === 1 && wActive.current)
+      wrist = gsap.to(wActive.current, { rotate: 4, duration: 0.58, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.75 });
 
     return () => {
       wave?.kill(); wrist?.kill();
-      gsap.to(active.current, { ...mirror(active, ARM_HIDDEN), svgOrigin: origin(active), duration: 0.38, ease: 'power2.in' });
+      gsap.to(active.current, { ...mirror(active, ARM_HIDDEN), svgOrigin: orig(active), duration: 0.38, ease: 'power2.in' });
       if (wActive.current) gsap.to(wActive.current, { rotate: 0, duration: 0.3 });
     };
   }, [arm]);
 
-  // Eyes: saccades / listening / thinking
+  // Eye saccades / look direction
   useEffect(() => {
-    const pupils = pupilsRef.current;
-    if (!pupils) return;
-    if (listening) { gsap.to(pupils, { x: 0, y: 0, duration: 0.28 }); return; }
-    if (thinking)  { gsap.to(pupils, { x: -2.6, y: -2, duration: 0.32, ease: 'power2.out' }); return; }
+    const p = pupilsRef.current;
+    if (!p) return;
+    if (listening) { gsap.to(p, { x: 0, y: 0, duration: 0.28 }); return; }
+    if (thinking)  { gsap.to(p, { x: -2.2, y: -2, duration: 0.32, ease: 'power2.out' }); return; }
     let t;
     const look = () => {
       const away = Math.random() < 0.35;
-      gsap.to(pupils, { x: away ? gsap.utils.random(-2.4, 2.4) : 0, y: away ? gsap.utils.random(-1.4, 1) : 0, duration: 0.11, ease: 'power2.out' });
-      t = setTimeout(look, 900 + Math.random() * 2400);
+      gsap.to(p, { x: away ? gsap.utils.random(-2, 2) : 0, y: away ? gsap.utils.random(-1.2, 0.8) : 0, duration: 0.12, ease: 'power2.out' });
+      t = setTimeout(look, 1100 + Math.random() * 2600);
     };
-    t = setTimeout(look, 1100);
+    t = setTimeout(look, 1200);
     return () => clearTimeout(t);
   }, [listening, thinking]);
 
-  // Head + brows while speaking / listening / thinking
+  // Head / brows for speaking / listening / thinking
   useEffect(() => {
     const head  = headRef.current;
     const brows = browsRef.current;
     if (!head || !brows) return;
-
     if (thinking) {
-      // Tilt head slightly right + look up-left
-      gsap.to(head, { rotate: -5, x: 0, svgOrigin: '100 190', duration: 0.5, ease: 'power2.out', overwrite: 'auto' });
+      gsap.to(head, { rotate: -4.5, x: 0, svgOrigin: '100 200', duration: 0.5, ease: 'power2.out', overwrite: 'auto' });
       return;
     }
     if (listening) {
-      // Lean forward very slightly
-      gsap.to(head, { rotate: -2.5, y: -1.5, svgOrigin: '100 190', duration: 0.45, ease: 'power2.out', overwrite: 'auto' });
+      gsap.to(head, { rotate: -2, y: -1.5, svgOrigin: '100 200', duration: 0.45, ease: 'power2.out', overwrite: 'auto' });
       return;
     }
-    // Reset position
-    gsap.to(head, { rotate: 0, x: 0, y: 0, svgOrigin: '100 190', duration: 0.55, ease: 'power2.out', overwrite: 'auto' });
-
+    gsap.to(head, { rotate: 0, x: 0, y: 0, svgOrigin: '100 200', duration: 0.55, ease: 'power2.out', overwrite: 'auto' });
     if (!speaking) return;
-    // Speaking: initial nod + periodic micro-nods + brow lifts
-    gsap.fromTo(head, { y: 0 }, { y: 2, duration: 0.16, yoyo: true, repeat: 3, ease: 'sine.inOut' });
-    const nods  = gsap.to(head,  { y: 2, svgOrigin: '100 190', duration: 1.8, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.7 });
-    const lifts = setInterval(() => gsap.to(brows, { y: -2.4, duration: 0.14, yoyo: true, repeat: 1, ease: 'power1.inOut' }), 1600 + Math.random() * 800);
+    gsap.fromTo(head, { y: 0 }, { y: 2, duration: 0.15, yoyo: true, repeat: 3, ease: 'sine.inOut' });
+    const nods  = gsap.to(head, { y: 2, svgOrigin: '100 200', duration: 1.9, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.7 });
+    const lifts = setInterval(() => gsap.to(brows, { y: -2.2, duration: 0.14, yoyo: true, repeat: 1, ease: 'power1.inOut' }), 1700 + Math.random() * 700);
     return () => { nods.kill(); clearInterval(lifts); gsap.to([brows, head], { y: 0, duration: 0.2 }); };
   }, [speaking, listening, thinking]);
 
-  // Lip-sync
+  // Lip sync
   useEffect(() => {
     if (!speaking) { setMouth('sil', 0.25); return undefined; }
     const queue = []; let lastBoundary = 0; let current = '';
     const started = performance.now();
-    const onBoundary = (e) => {
+    const onBoundary = e => {
       const word = (e.detail.text || '').slice(e.detail.charIndex).match(/^\S+/)?.[0] ?? '';
       queue.length = 0; queue.push(...wordVisemes(word)); lastBoundary = performance.now();
     };
@@ -250,382 +213,372 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
       else {
         const words = (textRef.current || '').split(/\s+/).filter(Boolean);
         if (words.length) {
-          const elapsed = now - started;
-          const w = words[Math.min(words.length - 1, Math.floor(elapsed / 165))];
+          const w = words[Math.min(words.length - 1, Math.floor((now - started) / 165))];
           const vs = wordVisemes(w);
-          v = vs[Math.floor(((elapsed % 165) / 165) * vs.length)];
-        } else {
-          v = ['aa', 'nn', 'E', 'PP', 'O', 'nn', 'aa', 'E'][Math.floor(Math.random() * 8)];
-        }
+          v = vs[Math.floor((((now - started) % 165) / 165) * vs.length)];
+        } else v = ['aa','nn','E','PP','O','nn','aa','E'][Math.floor(Math.random() * 8)];
       }
       if (v !== current) { current = v; setMouth(v); }
     };
     const iv = setInterval(tick, 75);
     return () => { clearInterval(iv); speechEvents.removeEventListener('boundary', onBoundary); };
-  }, [speaking]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [speaking]); // eslint-disable-line
 
-  // Mouse parallax (desktop only)
+  // Mouse parallax
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg || window.matchMedia('(pointer: coarse)').matches) return;
-    const onMove = (e) => {
+    const onMove = e => {
       const r = svg.getBoundingClientRect();
       gsap.to(headRef.current, {
-        x: gsap.utils.clamp(-5, 5, ((e.clientX - (r.left + r.width / 2)) / r.width) * 9),
-        y: gsap.utils.clamp(-3, 3, ((e.clientY - (r.top  + r.height / 2)) / r.height) * 5),
-        duration: 0.55, ease: 'power2.out',
+        x: gsap.utils.clamp(-4, 4, ((e.clientX - (r.left + r.width / 2)) / r.width) * 8),
+        y: gsap.utils.clamp(-2.5, 2.5, ((e.clientY - (r.top + r.height / 2)) / r.height) * 4),
+        duration: 0.6, ease: 'power2.out',
       });
     };
     window.addEventListener('mousemove', onMove);
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  const rest  = visemeFor('sil', expression);
-  const grain = getGrain();
+  const rest = visemeFor('sil', expression);
 
-  // Arm + hand shape
-  const armShape = (
+  // ── Arm shape (right; mirrored for left via transform) ───────────
+  const makeArm = (isLeft) => (
     <>
-      {/* Sleeve — deep navy matches the blazer */}
-      <path d="M 132 220 Q 152 219 170 221.5 Q 176 227 170 233 Q 152 235 132 236 Z" fill={url('blazer-arm')} />
-      <path d="M 134 221 Q 152 220 169 222.5 M 134 235 Q 152 234 169 232.5" fill="none" stroke="#fff" strokeWidth="0.7" opacity="0.15" strokeLinecap="round" />
-      {/* cuff */}
-      <path d="M 169 222 L 173.5 222.3 Q 176.5 227 173.5 232.4 L 169 232.6 Z" fill="#f5ede0" stroke={INK} strokeWidth="0.7" />
-      {/* hand group — wrapped for wrist micro-rotation */}
-      <g ref={arm === 'point-left' ? wristLRef : wristRRef} style={{ transformOrigin: '173px 227px' }}>
-        <g fill={url('skin-arm')} stroke={INK} strokeWidth="0.85" strokeLinejoin="round" strokeLinecap="round">
-          {handKind === 'point' && (
-            <>
-              <path d="M 173 222 Q 181 219.5 186 222.5 L 197 222.2 Q 199.5 223.8 197 225.6 L 186 226 Q 188 231 183 233.5 Q 176 234.5 173 231 Z" />
-              <path d="M 184 228 Q 187 229.5 185 231.5 M 181.5 230.5 Q 184 232.5 181.5 233.5" fill="none" />
-              <path d="M 176 221.6 Q 181 216.5 185.5 218.2 Q 186.5 220.2 183 221.5" />
-            </>
-          )}
-          {handKind === 'open' && (
-            <>
-              <path d="M 173 222.5 Q 180 220 186 221.5 L 197.5 222 Q 199.5 223.3 197.5 224.6 L 188 225 L 198 226.4 Q 200 227.7 198 229 L 188 229 L 196 230.6 Q 197.8 232 195.8 233 L 185 233 Q 178 235 173 231.5 Z" />
-              <path d="M 176 222 Q 180 215.5 185 216 Q 186.8 217.8 183.5 221" />
-            </>
-          )}
-          {handKind === 'wave' && (
-            <>
-              <path d="M 173 222 Q 180 219 185.5 221 Q 189 226.5 185.5 232.5 Q 179 235 173 232 Z" />
-              <path d="M 185 221.5 L 195 214.5 Q 197.5 215 196.5 217.5 L 187.8 224 L 199 221.2 Q 201 222.6 199 224.6 L 188.5 227 L 198.5 229.4 Q 200 231.4 197.6 232.2 L 187.6 229.8 L 194.6 236 Q 195.2 238.4 192.6 238 L 184.8 232" />
-              <path d="M 176.5 221.4 Q 178.5 213.5 183.5 212.6 Q 185.6 213.8 183.6 217.6 L 182.2 221" />
-            </>
-          )}
-          {handKind === 'thumb' && (
-            <>
-              <path d="M 172.5 221.5 Q 181 218.5 188 222 Q 191 227.5 188 233 Q 180 236 172.5 232.5 Z" />
-              <path d="M 184 222.4 Q 181.5 214 186.5 209.5 Q 190 208.4 190.6 211.4 L 188.6 221.5" />
-              <path d="M 184.5 226 Q 188.5 226.5 188.6 228.5 M 183.5 229.8 Q 187.8 230.4 187.5 232" fill="none" />
-            </>
-          )}
-          {handKind === 'fist' && (
-            <>
-              <path d="M 172.5 221.5 Q 181.5 218.5 189 222 Q 192 227.5 189 233 Q 180.5 236 172.5 232.5 Z" />
-              <path d="M 185 222.4 Q 188.8 223.6 188.2 226 M 185.2 226.6 Q 189.4 227.8 188.8 230.2 M 184.6 230.6 Q 188 231.6 187.4 233.2" fill="none" />
-            </>
-          )}
+      <path d="M 132 220 Q 152 219 170 221.5 Q 176 227 170 233 Q 152 235 132 236 Z"
+        fill={url('blazer-arm')} />
+      <path d="M 134 221 Q 152 220.5 168 222.5 M 134 234.5 Q 152 234 168 232"
+        fill="none" stroke="#4a8ab0" strokeWidth="0.6" opacity="0.18" strokeLinecap="round" />
+      <path d="M 169 222 L 174 222.5 Q 177 227 174 232.5 L 169 233 Z"
+        fill="#f8f4ee" stroke="#d0c8bc" strokeWidth="0.55" />
+      {/* Gold cufflink */}
+      <ellipse cx="172" cy="227.5" rx="2.2" ry="2.8" fill={url('gold')} />
+      <ellipse cx="171.5" cy="226.8" rx="0.9" ry="1.1" fill="#f8e890" opacity="0.9" />
+      {/* Watch on left arm */}
+      {isLeft && (
+        <g>
+          <rect x="168.5" y="224.5" width="7" height="6" rx="1.5" fill="#0e2d4a" stroke={url('gold')} strokeWidth="0.65" />
+          <rect x="169.5" y="225.5" width="5" height="4" rx="0.8" fill="#1a3d5c" />
+          <path d="M 172 226.2 L 172 227.7 L 173.2 228.5" stroke="#e8c86a" strokeWidth="0.45" strokeLinecap="round" />
+        </g>
+      )}
+      {/* Hand */}
+      <g ref={isLeft ? wristLRef : wristRRef} style={{ transformOrigin: '174px 227px' }}>
+        <g fill={url('skin-arm')} strokeLinecap="round" strokeLinejoin="round">
+          {handKind === 'relaxed' && (<>
+            <path d="M 173 222 Q 181.5 220 187 222.5 L 197 222 Q 199 223.5 197 225 L 187 225.5 Q 190 230.5 184.5 233 Q 177 235 173 231 Z" />
+            <path d="M 175.5 222 Q 179.5 215 185.5 216 Q 187 218 183.5 222" />
+            <path d="M 185 226 Q 189 226.8 188.5 229 M 184 230 Q 188 231 187.5 233" fill="none" stroke="#b07040" strokeWidth="0.5" opacity="0.5" />
+          </>)}
+          {handKind === 'wave' && (<>
+            <path d="M 173 222 Q 181 219 186.5 221.5 Q 190 226.5 186.5 232.5 Q 179.5 236 173 232 Z" />
+            <path d="M 186 222 L 196.5 215 Q 199 215.5 198 218 L 189 224.5 L 200 221.5 Q 202 223 200 225 L 190 228 L 200 229.5 Q 202 231.5 199.5 232.5 L 189.5 230 L 196 236 Q 197 238.5 194 238 L 186 232.5" />
+            <path d="M 177 222 Q 179.5 213.5 185.5 213 Q 187.5 214.5 185 218.5 L 183.5 222" />
+          </>)}
+          {handKind === 'point' && (<>
+            <path d="M 173 222 Q 181 219.5 186.5 222.5 L 197.5 222 Q 199.5 223.8 197.5 225.6 L 187 226 Q 189 231 183.5 233.5 Q 176.5 235.5 173 231 Z" />
+            <path d="M 176.5 222 Q 181 215.5 186.5 217.5 Q 188 219.5 184.5 222" />
+            <path d="M 185 228 Q 188.5 229 188 231.5 M 183 232 Q 186 233 185.5 235" fill="none" stroke="#b07040" strokeWidth="0.5" opacity="0.5" />
+          </>)}
+          {handKind === 'open' && (<>
+            <path d="M 173 222.5 Q 181 220 187.5 221.5 L 198.5 222 Q 200.5 223.5 198.5 225.2 L 189 225.5 L 199.5 227.2 Q 201.5 228.8 199 230.5 L 189 230 L 197.5 231.5 Q 199.5 233 197 234.5 L 186.5 233.5 Q 179.5 236 173 232.5 Z" />
+            <path d="M 177 222.5 Q 181.5 215 187 216 Q 188.5 218 185 222" />
+          </>)}
+          {handKind === 'thumb' && (<>
+            <path d="M 172.5 222 Q 182 219 189.5 222.5 Q 192 228.5 189 234.5 Q 181 238 172.5 234 Z" />
+            <path d="M 186.5 222.5 Q 183 214 188.5 209.5 Q 192.5 208 192.5 212 L 190 222" />
+            <path d="M 186 226.5 Q 190 227 189.5 229.5 M 185.5 230.5 Q 189.5 231.5 189 233.5" fill="none" stroke="#b07040" strokeWidth="0.5" opacity="0.5" />
+          </>)}
+          {handKind === 'fist' && (<>
+            <path d="M 172.5 222 Q 182 219 190 222.5 Q 192.5 228.5 189.5 234.5 Q 181.5 238 172.5 234 Z" />
+            <path d="M 186.5 222.5 Q 190.5 224 190 226.5 M 186 227 Q 190.5 229 190 231.5 M 185.5 231.5 Q 189.5 233 188.5 235" fill="none" stroke="#b07040" strokeWidth="0.5" opacity="0.5" />
+          </>)}
         </g>
       </g>
     </>
   );
 
   return (
-    <svg
-      ref={svgRef}
-      viewBox="0 0 200 320"
-      width={size}
-      height={size * 1.6}
-      role="img"
-      aria-label={`Elena, your Aurrum career advisor, ${expression} expression${speaking ? ', speaking' : ''}`}
-    >
+    <svg ref={svgRef} viewBox="0 0 200 320" width={size} height={size * 1.6}
+      role="img" aria-label={`Elena, Aurrum career advisor — ${expression}`}>
       <defs>
-        {/* ── Skin ── */}
-        <radialGradient id={id('skin')} cx="44%" cy="32%" r="70%">
-          <stop offset="0%"   stopColor="#fce8d4" />
-          <stop offset="40%"  stopColor="#f0c9a0" />
-          <stop offset="80%"  stopColor="#d9a070" />
-          <stop offset="100%" stopColor="#c4895a" />
+        {/* Skin */}
+        <radialGradient id={id('skin-face')} cx="42%" cy="28%" r="70%">
+          <stop offset="0%"   stopColor="#fde6c8" />
+          <stop offset="42%"  stopColor="#f0c490" />
+          <stop offset="82%"  stopColor="#d89464" />
+          <stop offset="100%" stopColor="#c07040" />
         </radialGradient>
-        <radialGradient id={id('skin-arm')} cx="40%" cy="30%" r="75%">
-          <stop offset="0%"   stopColor="#f8dfc4" />
-          <stop offset="100%" stopColor="#c9895a" />
+        <radialGradient id={id('skin-arm')} cx="35%" cy="25%" r="75%">
+          <stop offset="0%"   stopColor="#fce2c4" />
+          <stop offset="100%" stopColor="#c8804a" />
         </radialGradient>
         <linearGradient id={id('neck')} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#b8794f" />
-          <stop offset="50%"  stopColor="#d9a070" />
+          <stop offset="0%"  stopColor="#c07848" />
+          <stop offset="60%" stopColor="#d89264" />
         </linearGradient>
-        {/* ── Hair: warm dark-chocolate with amber highlight ── */}
-        <linearGradient id={id('hair')} x1="0.25" y1="0" x2="0.6" y2="1">
-          <stop offset="0%"   stopColor="#4a2e1c" />
-          <stop offset="35%"  stopColor="#311a0e" />
-          <stop offset="100%" stopColor="#1e0e07" />
-        </linearGradient>
-        <linearGradient id={id('hair-hi')} x1="0" y1="0" x2="1" y2="0.6">
-          <stop offset="0%"   stopColor="#7a4f2e" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#3d2213"  stopOpacity="0" />
-        </linearGradient>
-        {/* ── Blazer: deep navy teal (luxe/premium) ── */}
-        <linearGradient id={id('blazer')} x1="0.15" y1="0" x2="0.5" y2="1">
-          <stop offset="0%"   stopColor="#1f5570" />
-          <stop offset="55%"  stopColor="#133d52" />
-          <stop offset="100%" stopColor="#0a2636" />
-        </linearGradient>
-        <linearGradient id={id('blazer-arm')} x1="0" y1="0" x2="1" y2="0.3">
-          <stop offset="0%"   stopColor="#1a4e68" />
-          <stop offset="100%" stopColor="#0d3044" />
-        </linearGradient>
-        <linearGradient id={id('blazer-lapel')} x1="0" y1="0" x2="0.5" y2="1">
-          <stop offset="0%"   stopColor="#1d5875" />
-          <stop offset="100%" stopColor="#0e3b52" />
-        </linearGradient>
-        {/* ── Eyes ── */}
-        <radialGradient id={id('iris')} cx="40%" cy="36%" r="64%">
-          <stop offset="0%"   stopColor="#b07840" />
-          <stop offset="55%"  stopColor="#6a3e20" />
-          <stop offset="85%"  stopColor="#341c0c" />
-          <stop offset="100%" stopColor="#1a0c05" />
+        {/* Hair */}
+        <radialGradient id={id('hair')} cx="28%" cy="18%" r="76%">
+          <stop offset="0%"   stopColor="#4a2c18" />
+          <stop offset="38%"  stopColor="#2c1610" />
+          <stop offset="100%" stopColor="#140808" />
         </radialGradient>
-        {/* ── Cheek blush ── */}
-        <radialGradient id={id('cheek')} cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="#d96a58" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#d96a58" stopOpacity="0" />
+        <linearGradient id={id('hair-hi')} x1="0.18" y1="0" x2="0.5" y2="0.85">
+          <stop offset="0%"   stopColor="#7a4e2e" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#3c1e10" stopOpacity="0" />
+        </linearGradient>
+        {/* Blazer — deep navy */}
+        <linearGradient id={id('blazer')} x1="0.15" y1="0" x2="0.55" y2="1">
+          <stop offset="0%"   stopColor="#1c4d6c" />
+          <stop offset="50%"  stopColor="#0e3250" />
+          <stop offset="100%" stopColor="#061e34" />
+        </linearGradient>
+        <linearGradient id={id('blazer-arm')} x1="0.1" y1="0" x2="0.5" y2="1">
+          <stop offset="0%"   stopColor="#1a4c6a" />
+          <stop offset="100%" stopColor="#092c48" />
+        </linearGradient>
+        <linearGradient id={id('blazer-lapel')} x1="0" y1="0" x2="0.25" y2="1">
+          <stop offset="0%"   stopColor="#1e5575" />
+          <stop offset="100%" stopColor="#0c3452" />
+        </linearGradient>
+        {/* Shirt */}
+        <linearGradient id={id('shirt')} x1="0" y1="0" x2="0.5" y2="1">
+          <stop offset="0%"   stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#e8e0d4" />
+        </linearGradient>
+        {/* Teal */}
+        <linearGradient id={id('teal')} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stopColor="#1e8888" />
+          <stop offset="100%" stopColor="#135868" />
+        </linearGradient>
+        {/* Gold */}
+        <linearGradient id={id('gold')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#eacb6a" />
+          <stop offset="100%" stopColor="#b88828" />
+        </linearGradient>
+        {/* Eyes */}
+        <radialGradient id={id('iris')} cx="36%" cy="32%" r="64%">
+          <stop offset="0%"   stopColor="#b88040" />
+          <stop offset="52%"  stopColor="#6a3c1c" />
+          <stop offset="86%"  stopColor="#2c1208" />
+          <stop offset="100%" stopColor="#140804" />
         </radialGradient>
-        {/* ── Lips: rose-mauve ── */}
+        {/* Blush */}
+        <radialGradient id={id('blush')} cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="#e06858" stopOpacity="0.26" />
+          <stop offset="100%" stopColor="#e06858" stopOpacity="0" />
+        </radialGradient>
+        {/* Lips */}
         <linearGradient id={id('lip')} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#a84656" />
-          <stop offset="100%" stopColor="#c46a72" />
+          <stop offset="0%"   stopColor="#b04a5e" />
+          <stop offset="100%" stopColor="#c86878" />
         </linearGradient>
-        {/* ── Studio light bloom behind Elena ── */}
-        <radialGradient id={id('glow')} cx="50%" cy="28%" r="55%">
-          <stop offset="0%"   stopColor="#fff8f0" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#fff8f0" stopOpacity="0" />
+        {/* Studio glow */}
+        <radialGradient id={id('glow')} cx="50%" cy="24%" r="55%">
+          <stop offset="0%"   stopColor="#f8f2ea" stopOpacity="0.65" />
+          <stop offset="100%" stopColor="#f8f2ea" stopOpacity="0" />
         </radialGradient>
-        {/* ── Filters ── */}
-        <filter id={id('wash')} x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.6" />
+        {/* Filters */}
+        <filter id={id('blur-s')} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2.0" />
         </filter>
-        <filter id={id('soft')} x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="2.8" />
+        <filter id={id('blur-m')} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="3.8" />
         </filter>
-        {grain && (
-          <pattern id={id('grain')} patternUnits="userSpaceOnUse" width="48" height="48">
-            <image href={grain} width="48" height="48" />
-          </pattern>
-        )}
-        {/* ── Clip paths ── */}
+        {/* Clip paths */}
         <clipPath id={id('face-clip')}>
-          <path d="M 60 106 Q 60 62 100 60 Q 140 62 140 106 Q 140 140 124 160 Q 112 174 100 174 Q 88 174 76 160 Q 60 140 60 106 Z" />
+          <path d="M 64 90 C 63 52 80 50 100 50 C 120 50 137 52 136 90 C 137 126 120 155 108 165 C 104 168 100 168 96 165 C 80 155 63 126 64 90 Z" />
         </clipPath>
-        <clipPath id={id('body-clip')}>
-          <path d="M 30 320 Q 32 244 62 225 Q 82 214 100 214 Q 118 214 138 225 Q 168 244 170 320 Z" />
+        <clipPath id={id('eye-l')}>
+          <path d="M 68 110 Q 80 101 92 110 Q 80 119 68 110 Z" />
         </clipPath>
-        <clipPath id={id('eye-l')}><path d="M 69 113 Q 80 103.5 91 112.5 Q 80 119 69 113 Z" /></clipPath>
-        <clipPath id={id('eye-r')}><path d="M 109 112.5 Q 120 103.5 131 113 Q 120 119 109 112.5 Z" /></clipPath>
-        <clipPath id={id('mouth')}><path ref={mouthClipRef} d={rest.d} /></clipPath>
+        <clipPath id={id('eye-r')}>
+          <path d="M 108 110 Q 120 101 132 110 Q 120 119 108 110 Z" />
+        </clipPath>
+        <clipPath id={id('mouth-clip')}>
+          <path ref={mouthClipRef} d={rest.d} />
+        </clipPath>
       </defs>
 
-      {/* ── Studio light glow (behind everything) ── */}
-      <ellipse cx="100" cy="80" rx="88" ry="100" fill={url('glow')} />
+      {/* Ambient studio glow */}
+      <ellipse cx="100" cy="82" rx="88" ry="106" fill={url('glow')} />
 
-      {/* ═══════════════ BODY ═══════════════ */}
+      {/* ═══ BODY ═══ */}
       <g ref={torsoRef}>
-        {/* Blazer body */}
-        <path d="M 30 320 Q 32 244 62 225 Q 82 214 100 214 Q 118 214 138 225 Q 168 244 170 320 Z" fill={url('blazer')} />
-        <g clipPath={url('body-clip')}>
-          {/* Shading: shoulder facets, side folds, ambient occlusion under collar */}
-          <g filter={url('wash')} opacity="0.5">
-            <path d="M 30 268 Q 44 238 66 228 Q 50 264 46 320 L 30 320 Z" fill="#0a2032" />
-            <path d="M 170 268 Q 156 238 134 228 Q 150 264 154 320 L 170 320 Z" fill="#0a2032" />
-            <path d="M 70 234 Q 88 268 96 308 L 86 308 Q 76 272 64 246 Z" fill="#1a4258" opacity="0.6" />
-            <path d="M 130 234 Q 112 268 104 308 L 114 308 Q 124 272 136 246 Z" fill="#1a4258" opacity="0.6" />
-          </g>
-          {/* Shoulder highlight */}
-          <path d="M 66 232 Q 62 248 58 264" fill="none" stroke="#5aa0c0" strokeWidth="2" opacity="0.18" strokeLinecap="round" />
-          <path d="M 134 232 Q 138 248 142 264" fill="none" stroke="#5aa0c0" strokeWidth="2" opacity="0.18" strokeLinecap="round" />
-          {grain && <rect x="26" y="208" width="148" height="116" fill={url('grain')} opacity="0.7" />}
-        </g>
-
-        {/* Blouse (ivory V-neck) */}
-        <path d="M 81 217 L 100 266 L 119 217 Q 100 209 81 217 Z" fill="#faf4ec" />
-        <path d="M 85 218 Q 100 240 115 218" fill="none" stroke="#ded4c4" strokeWidth="1.3" />
-        <path d="M 97 246 Q 100 252 103 246"  fill="none" stroke="#ded4c4" strokeWidth="0.9" />
-
-        {/* Lapels: slightly lighter navy with interior highlight edge */}
-        <path d="M 79 218 L 100 270 L 89 285 L 67 234 Q 70 224 79 218 Z" fill={url('blazer-lapel')} />
-        <path d="M 121 218 L 100 270 L 111 285 L 133 234 Q 130 224 121 218 Z" fill={url('blazer-lapel')} />
-        {/* lapel highlight edge */}
-        <path d="M 73 230 L 89 285 M 127 230 L 111 285" stroke="#5ab4d8" strokeWidth="0.8" opacity="0.22" strokeLinecap="round" />
-
-        {/* Pocket square — pale ivory */}
-        <path d="M 122 252 L 136 250 L 137 258 L 126 260 Z" fill="#f5eede" stroke={INK} strokeWidth="0.6" opacity="0.85" />
-        <path d="M 124 252 Q 128 248 133 252 M 129 250 L 130 246" stroke={INK} strokeWidth="0.55" opacity="0.6" fill="none" />
-
-        {/* Gold pin */}
-        <circle cx="123" cy="245" r="3.2" fill="#c9a445" stroke="#8a6520" strokeWidth="0.65" />
-        <circle cx="122" cy="244" r="1.1" fill="#f6dfa0" />
-
-        {/* Ink outlines */}
-        <g fill="none" stroke={INK} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M 30 320 Q 32 244 62 225 Q 82 214 100 214 Q 118 214 138 225 Q 168 244 170 320" strokeWidth="1.2" />
-          <path d="M 79 218 L 100 270 L 89 285 L 67 234 Q 70 224 79 218" strokeWidth="1" />
-          <path d="M 121 218 L 100 270 L 111 285 L 133 234 Q 130 224 121 218" strokeWidth="1" />
-          <path d="M 81 217 L 100 266 L 119 217" strokeWidth="0.75" opacity="0.75" />
-          <path d="M 36 298 Q 42 256 60 234" strokeWidth="0.55" opacity="0.45" />
-        </g>
+        <path d="M 36 320 Q 38 242 64 208 Q 80 196 100 194 Q 120 196 136 208 Q 162 242 164 320 Z"
+          fill={url('blazer')} />
+        {/* Side depth shadows */}
+        <path d="M 36 320 Q 38 268 50 240 Q 60 222 70 212 L 76 216 Q 64 232 56 258 Q 46 284 44 320 Z"
+          fill="#030d1a" opacity="0.42" />
+        <path d="M 164 320 Q 162 268 150 240 Q 140 222 130 212 L 124 216 Q 136 232 144 258 Q 154 284 156 320 Z"
+          fill="#030d1a" opacity="0.42" />
+        {/* Centre chest highlight */}
+        <path d="M 97 196 Q 100 310 100 320 L 103 320 Q 103 310 100 196 Z" fill="#2a5e84" opacity="0.28" />
+        {/* White shirt */}
+        <path d="M 80 202 L 100 272 L 120 202 Q 110 196 100 194 Q 90 196 80 202 Z"
+          fill={url('shirt')} />
+        <path d="M 100 202 L 100 272" stroke="#ccc6b8" strokeWidth="0.8" opacity="0.7" />
+        <circle cx="100" cy="220" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
+        <circle cx="100" cy="236" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
+        <circle cx="100" cy="252" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
+        {/* Collar */}
+        <path d="M 80 202 L 87 194 L 100 210 L 113 194 L 120 202 L 100 272 Z"
+          fill={url('shirt')} />
+        <path d="M 87 194 L 100 218 M 113 194 L 100 218"
+          stroke="#ccc6b8" strokeWidth="0.6" opacity="0.65" />
+        {/* Lapels */}
+        <path d="M 80 202 L 100 272 L 88 292 L 56 248 Q 54 230 64 212 Z"
+          fill={url('blazer-lapel')} />
+        <path d="M 120 202 L 100 272 L 112 292 L 144 248 Q 146 230 136 212 Z"
+          fill={url('blazer-lapel')} />
+        <path d="M 64 214 L 90 292 M 136 214 L 110 292"
+          stroke="#4a9ac0" strokeWidth="0.6" opacity="0.18" strokeLinecap="round" />
+        {/* Teal pocket square */}
+        <path d="M 118 246 L 134 243 L 135 252 L 122 254 Z" fill={url('teal')} opacity="0.9" />
+        <path d="M 121 246 Q 128 240 133 244" stroke="#0a4858" strokeWidth="0.55" fill="none" opacity="0.75" />
+        {/* Gold Aurrum pin */}
+        <circle cx="120" cy="236" r="3.8" fill={url('gold')} />
+        <circle cx="119.3" cy="235.3" r="1.5" fill="#f8e890" opacity="0.88" />
+        <text x="120" y="237.2" textAnchor="middle" fontSize="3.8" fill="#7a5010"
+          fontFamily="Georgia,serif" fontWeight="bold">A</text>
+        {/* Blazer buttons */}
+        <circle cx="100" cy="286" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
+        <circle cx="100" cy="272" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
       </g>
 
-      {/* ═══════════════ HEAD ═══════════════ */}
+      {/* ═══ HEAD ═══ */}
       <g ref={headRef}>
-        {/* Long hair (behind face) */}
-        <path
-          d="M 100 36 C 57 36 40 70 43 112 C 45 152 34 188 49 214 C 64 222 78 210 77 197 C 70 170 64 140 64 112 L 136 112 C 136 140 130 170 123 197 C 122 210 136 222 151 214 C 166 188 155 152 157 112 C 160 70 143 36 100 36 Z"
-          fill={url('hair')}
-        />
-        {/* Amber highlight on hair */}
-        <path
-          d="M 100 36 C 57 36 40 70 43 112 C 45 140 38 170 46 206 C 56 212 68 206 68 197 C 66 170 62 140 63 112 L 82 112 Q 88 80 100 60 Z"
-          fill={url('hair-hi')}
-          opacity="0.55"
-        />
+        {/* Back hair */}
+        <path d="M 100 28 C 54 28 36 62 36 98 C 36 136 42 166 50 194 C 60 200 72 192 72 180 C 68 154 66 128 66 98 L 134 98 C 134 128 132 154 128 180 C 128 192 140 200 150 194 C 158 166 164 136 164 98 C 164 62 146 28 100 28 Z"
+          fill={url('hair')} />
+        <path d="M 100 28 C 54 28 36 62 38 98 C 44 86 58 70 72 62 C 82 56 92 50 100 50 Z"
+          fill={url('hair-hi')} opacity="0.52" />
         <g fill="none" strokeLinecap="round">
-          <path d="M 52 120 C 50 150 46 180 52 208 M 58 128 C 57 160 58 188 66 206 M 148 120 C 150 150 154 180 148 208 M 142 128 C 143 160 142 188 134 206" stroke="#6b4530" strokeWidth="0.9" opacity="0.55" />
-          <path d="M 47 140 C 44 168 42 190 47 210 M 153 140 C 156 168 158 190 153 210" stroke="#1d110b" strokeWidth="1.1" opacity="0.6" />
+          <path d="M 50 122 C 46 150 48 172 52 192" stroke="#3c1e10" strokeWidth="1.0" opacity="0.62" />
+          <path d="M 44 132 C 40 162 44 184 50 196" stroke="#1a0c06" strokeWidth="1.0" opacity="0.52" />
+          <path d="M 150 122 C 154 150 152 172 148 192" stroke="#3c1e10" strokeWidth="1.0" opacity="0.62" />
+          <path d="M 156 132 C 160 162 156 184 150 196" stroke="#1a0c06" strokeWidth="1.0" opacity="0.52" />
         </g>
 
-        {/* Neck + under-jaw shadow */}
-        <path d="M 83 156 Q 84 190 78 214 Q 100 226 122 214 Q 116 190 117 156 Z" fill={url('neck')} />
-        <path d="M 83 168 Q 100 186 117 168 L 117 158 L 83 158 Z" fill="#9c6040" opacity="0.4" filter={url('wash')} />
+        {/* Neck */}
+        <path d="M 84 162 Q 84 194 80 202 Q 100 212 120 202 Q 116 194 116 162 Z"
+          fill={url('neck')} />
+        <path d="M 84 170 Q 100 190 116 170 L 116 160 L 84 160 Z"
+          fill="#a06840" opacity="0.28" filter={url('blur-s')} />
 
         {/* Face */}
-        <path d="M 60 106 Q 60 62 100 60 Q 140 62 140 106 Q 140 140 124 160 Q 112 174 100 174 Q 88 174 76 160 Q 60 140 60 106 Z" fill={url('skin')} />
+        <path d="M 64 90 C 63 52 80 50 100 50 C 120 50 137 52 136 90 C 137 126 120 155 108 165 C 104 168 100 168 96 165 C 80 155 63 126 64 90 Z"
+          fill={url('skin-face')} />
         <g clipPath={url('face-clip')}>
-          <g filter={url('wash')}>
-            <path d="M 60 100 Q 64 140 84 170 L 60 170 Z" fill="#c07a55" opacity="0.35" />
-            <path d="M 140 100 Q 136 140 116 170 L 140 170 Z" fill="#c07a55" opacity="0.35" />
-            <ellipse cx="78"  cy="104" rx="13" ry="5.5" fill="#c4805c" opacity="0.24" />
-            <ellipse cx="122" cy="104" rx="13" ry="5.5" fill="#c4805c" opacity="0.24" />
-            <path d="M 95 116 Q 92 130 91 136 L 95 136 Z" fill="#b87a58" opacity="0.38" />
-            <ellipse cx="100" cy="70" rx="34" ry="12" fill="#a8704a" opacity="0.28" />
+          <g filter={url('blur-s')} opacity="0.36">
+            <path d="M 64 88 Q 68 132 86 168 L 64 168 Z" fill="#c07848" />
+            <path d="M 136 88 Q 132 132 114 168 L 136 168 Z" fill="#c07848" />
           </g>
-          {/* Cheek blush */}
-          <ellipse cx="73"  cy="133" rx="12" ry="7.5" fill={url('cheek')} />
-          <ellipse cx="127" cy="133" rx="12" ry="7.5" fill={url('cheek')} />
-          {/* Specular highlight on forehead/nose bridge */}
-          <path d="M 104 88 Q 110 112 107 126" stroke="#fff" strokeWidth="3.5" opacity="0.1" fill="none" filter={url('soft')} />
-          {grain && <rect x="56" y="56" width="90" height="122" fill={url('grain')} opacity="0.65" />}
+          <path d="M 104 84 Q 108 114 106 128"
+            stroke="#fff" strokeWidth="4" opacity="0.07" fill="none" filter={url('blur-s')} />
+          <ellipse cx="72"  cy="132" rx="13" ry="8" fill={url('blush')} />
+          <ellipse cx="128" cy="132" rx="13" ry="8" fill={url('blush')} />
         </g>
-        {/* Face outline */}
-        <path d="M 60 106 Q 60 62 100 60 Q 140 62 140 106 Q 140 140 124 160 Q 112 174 100 174 Q 88 174 76 160 Q 60 140 60 106" fill="none" stroke={INK} strokeWidth="1.05" opacity="0.7" strokeLinecap="round" />
 
-        {/* Ears + earrings */}
-        <path d="M 61 118 Q 55 122 58 134 Q 60 138 63 136" fill="#d99e78" stroke={INK} strokeWidth="0.8" />
-        <path d="M 139 118 Q 145 122 142 134 Q 140 138 137 136" fill="#d99e78" stroke={INK} strokeWidth="0.8" />
-        {/* Teardrop earrings — rose gold */}
-        <ellipse cx="59.5" cy="140" rx="2.8" ry="3.6" fill="#d4956a" stroke="#9a6535" strokeWidth="0.55" />
-        <ellipse cx="140.5" cy="140" rx="2.8" ry="3.6" fill="#d4956a" stroke="#9a6535" strokeWidth="0.55" />
-        <circle cx="59.5" cy="137" r="1.2" fill="#c9994a" stroke="#8a6326" strokeWidth="0.45" />
-        <circle cx="140.5" cy="137" r="1.2" fill="#c9994a" stroke="#8a6326" strokeWidth="0.45" />
+        {/* Ears */}
+        <path d="M 63 112 Q 56 116 58 128 Q 60 132 63 130" fill="#d49060" stroke="#b07040" strokeWidth="0.5" />
+        <path d="M 137 112 Q 144 116 142 128 Q 140 132 137 130" fill="#d49060" stroke="#b07040" strokeWidth="0.5" />
+        {/* Gold stud earrings */}
+        <circle cx="60"  cy="120" r="3.4" fill={url('gold')} />
+        <circle cx="59.4" cy="119.4" r="1.3" fill="#f8e890" opacity="0.9" />
+        <circle cx="140" cy="120" r="3.4" fill={url('gold')} />
+        <circle cx="139.4" cy="119.4" r="1.3" fill="#f8e890" opacity="0.9" />
 
         {/* Eyebrows */}
-        <g transform="translate(0 7)">
-          <g ref={browsRef}>
-            <path ref={browLRef} d={EYEBROW.friendly.l} fill="none" stroke="#2e1a0e" strokeWidth="2.8" strokeLinecap="round" />
-            <path ref={browRRef} d={EYEBROW.friendly.r} fill="none" stroke="#2e1a0e" strokeWidth="2.8" strokeLinecap="round" />
-            {/* Soft inner brow for thickness */}
-            <path d={EYEBROW.friendly.l} fill="none" stroke="#5a3820" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-            <path d={EYEBROW.friendly.r} fill="none" stroke="#5a3820" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-          </g>
+        <g ref={browsRef}>
+          <path ref={browLRef} d={BROW.friendly.l} fill="none" stroke="#2a1808" strokeWidth="2.7" strokeLinecap="round" />
+          <path ref={browRRef} d={BROW.friendly.r} fill="none" stroke="#2a1808" strokeWidth="2.7" strokeLinecap="round" />
+          <path d={BROW.friendly.l} fill="none" stroke="#5a3418" strokeWidth="1.2" strokeLinecap="round" opacity="0.48" />
+          <path d={BROW.friendly.r} fill="none" stroke="#5a3418" strokeWidth="1.2" strokeLinecap="round" opacity="0.48" />
         </g>
 
         {/* Eyes */}
         <g ref={eyesRef}>
-          <path d="M 70 106 Q 80 99.5 90 106" fill="none" stroke="#a8704f" strokeWidth="0.9" opacity="0.65" />
-          <path d="M 110 106 Q 120 99.5 130 106" fill="none" stroke="#a8704f" strokeWidth="0.9" opacity="0.65" />
-          {/* Whites */}
-          <path d="M 69 113 Q 80 103.5 91 112.5 Q 80 119 69 113 Z" fill="#faf5ee" />
-          <path d="M 109 112.5 Q 120 103.5 131 113 Q 120 119 109 112.5 Z" fill="#faf5ee" />
-          {/* Irises + pupils + catchlights */}
+          <ellipse cx="80"  cy="109" rx="13" ry="6.5" fill="#8a4c28" opacity="0.15" filter={url('blur-s')} />
+          <ellipse cx="120" cy="109" rx="13" ry="6.5" fill="#8a4c28" opacity="0.15" filter={url('blur-s')} />
+          <path d="M 68 110 Q 80 101 92 110 Q 80 119 68 110 Z"  fill="#faf6f0" />
+          <path d="M 108 110 Q 120 101 132 110 Q 120 119 108 110 Z" fill="#faf6f0" />
           <g ref={pupilsRef}>
             <g clipPath={url('eye-l')}>
-              <circle cx="80" cy="111.5" r="5.1" fill={url('iris')} />
-              {/* Limbal ring */}
-              <circle cx="80" cy="111.5" r="5.1" fill="none" stroke="#150a04" strokeWidth="1.1" />
-              <circle cx="80" cy="111.5" r="2.2" fill="#0e0604" />
-              <circle cx="81.8" cy="109.5" r="1.3" fill="#fff" />
-              <circle cx="78.2" cy="113.4" r="0.55" fill="#fff" opacity="0.55" />
+              <circle cx="80"  cy="110" r="5.6" fill={url('iris')} />
+              <circle cx="80"  cy="110" r="5.6" fill="none" stroke="#18080a" strokeWidth="1.0" />
+              <circle cx="80"  cy="110" r="2.4" fill="#0c0604" />
+              <circle cx="82"  cy="107.6" r="1.6" fill="#fff" />
+              <circle cx="77.8" cy="112.4" r="0.6" fill="#fff" opacity="0.5" />
             </g>
             <g clipPath={url('eye-r')}>
-              <circle cx="120" cy="111.5" r="5.1" fill={url('iris')} />
-              <circle cx="120" cy="111.5" r="5.1" fill="none" stroke="#150a04" strokeWidth="1.1" />
-              <circle cx="120" cy="111.5" r="2.2" fill="#0e0604" />
-              <circle cx="121.8" cy="109.5" r="1.3" fill="#fff" />
-              <circle cx="118.2" cy="113.4" r="0.55" fill="#fff" opacity="0.55" />
+              <circle cx="120" cy="110" r="5.6" fill={url('iris')} />
+              <circle cx="120" cy="110" r="5.6" fill="none" stroke="#18080a" strokeWidth="1.0" />
+              <circle cx="120" cy="110" r="2.4" fill="#0c0604" />
+              <circle cx="122" cy="107.6" r="1.6" fill="#fff" />
+              <circle cx="117.8" cy="112.4" r="0.6" fill="#fff" opacity="0.5" />
             </g>
           </g>
-          {/* Upper-lid shadow */}
-          <path d="M 69 113 Q 80 103.5 91 112.5 Q 80 107 69 113 Z" fill="#5a3020" opacity="0.22" />
-          <path d="M 109 112.5 Q 120 103.5 131 113 Q 120 107 109 112.5 Z" fill="#5a3020" opacity="0.22" />
-          {/* Lids + lashes */}
-          <path d="M 67.5 113 Q 80 102 92 112" fill="none" stroke="#160c06" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M 108 112 Q 120 102 132.5 113"  fill="none" stroke="#160c06" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M 67.5 113 l -3 -1.8 M 70 110 l -2.4 -2.6 M 73.5 107.4 l -1.6 -2.8 M 132.5 113 l 3 -1.8 M 130 110 l 2.4 -2.6 M 126.5 107.4 l 1.6 -2.8" stroke="#160c06" strokeWidth="1.15" strokeLinecap="round" />
-          <path d="M 71 115 Q 80 119.8 89 114.8 M 111 114.8 Q 120 119.8 129 115" fill="none" stroke="#9c6446" strokeWidth="0.85" opacity="0.75" />
+          <path d="M 68 110 Q 80 101 92 110 Q 80 106 68 110 Z"  fill="#5a2e18" opacity="0.18" />
+          <path d="M 108 110 Q 120 101 132 110 Q 120 106 108 110 Z" fill="#5a2e18" opacity="0.18" />
+          <path d="M 66.5 110 Q 80 99.5 93.5 110"  fill="none" stroke="#180808" strokeWidth="2.1" strokeLinecap="round" />
+          <path d="M 106.5 110 Q 120 99.5 133.5 110" fill="none" stroke="#180808" strokeWidth="2.1" strokeLinecap="round" />
+          <path d="M 66.5 110 l -3 -1.9 M 69 107.2 l -2.4 -2.6 M 73 104.8 l -1.5 -2.8 M 133.5 110 l 3 -1.9 M 131 107.2 l 2.4 -2.6 M 127 104.8 l 1.5 -2.8"
+            stroke="#180808" strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M 70 113.5 Q 80 118.5 90 113.5 M 110 113.5 Q 120 118.5 130 113.5"
+            fill="none" stroke="#9a6040" strokeWidth="0.75" opacity="0.62" />
         </g>
 
         {/* Nose */}
-        <path d="M 97.5 114 Q 95.5 128 92.5 135 Q 95.5 139.5 100 139" fill="none" stroke="#a06040" strokeWidth="1.3" strokeLinecap="round" />
-        <path d="M 93.5 136.6 q 2 1.6 4 0.8 M 102.5 137.6 q 2 0.8 4 -0.8" fill="none" stroke="#8a4e30" strokeWidth="1.1" strokeLinecap="round" />
-        <path d="M 101.8 117.5 Q 103 128 104.5 132" fill="none" stroke="#fff" strokeWidth="1.4" opacity="0.25" strokeLinecap="round" />
-        <path d="M 98.2 140.5 L 98.8 143.6 M 101.8 140.5 L 101.2 143.6" stroke="#b07050" strokeWidth="0.65" opacity="0.55" />
-
-        {/* Glasses — thin gold wire frames */}
-        <g fill="none" stroke="#3a2a14" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.9">
-          <circle cx="80"  cy="112" r="14.5" />
-          <circle cx="120" cy="112" r="14.5" />
-          <path d="M 94.5 111 Q 100 107.5 105.5 111" />
-          <path d="M 65.5 110 L 58 107" />
-          <path d="M 134.5 110 L 142 107" />
-        </g>
-        {/* Lens shine */}
-        <circle cx="80"  cy="112" r="14.5" fill="none" stroke="#c9a445" strokeWidth="0.4" opacity="0.4" />
-        <circle cx="120" cy="112" r="14.5" fill="none" stroke="#c9a445" strokeWidth="0.4" opacity="0.4" />
-        <circle cx="80"  cy="112" r="14.5" fill="#fff" opacity="0.04" />
-        <circle cx="120" cy="112" r="14.5" fill="#fff" opacity="0.04" />
+        <path d="M 99 114 Q 96 129 93 135" fill="none" stroke="#a87040" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 93.5 134 q 2 1.8 4 1 M 102.5 135 q 1.8 0.8 4 -1"
+          fill="none" stroke="#906038" strokeWidth="1.1" strokeLinecap="round" />
+        <path d="M 102.5 117 Q 104 129 102 135"
+          stroke="#fff" strokeWidth="1.3" opacity="0.16" fill="none" strokeLinecap="round" />
+        <path d="M 97.5 141 L 97.8 144.5 M 102.5 141 L 102.2 144.5"
+          stroke="#b07848" strokeWidth="0.6" opacity="0.48" />
 
         {/* Mouth */}
-        <path ref={mouthRef} d={rest.d} fill="#50141e" stroke={url('lip')} strokeWidth="3.2" strokeLinejoin="round" />
-        <g clipPath={url('mouth')}>
+        <path ref={mouthRef} d={rest.d} fill="#501420" stroke={url('lip')} strokeWidth="3.1" strokeLinejoin="round" />
+        <g clipPath={url('mouth-clip')}>
           <g ref={teethRef} opacity="0">
-            <path d="M 86 143 Q 100 141.5 114 143 L 114 147.6 Q 100 149 86 147.6 Z" fill="#f5f0e8" />
-            <path d="M 90 154 Q 100 150.5 110 154 L 110 160 L 90 160 Z" fill="#a83040" opacity="0.8" />
+            <path d="M 86 144.5 Q 100 143 114 144.5 L 114 149 Q 100 150.5 86 149 Z" fill="#f0ece4" />
+            <path d="M 90 154 Q 100 151 110 154 L 110 158.5 L 90 158.5 Z" fill="#a83040" opacity="0.8" />
           </g>
         </g>
-        <path d="M 95 150.2 Q 100 151.6 105 150.2" stroke="#fff" strokeWidth="0.85" opacity="0.3" fill="none" strokeLinecap="round" />
+        <path d="M 94.5 149 Q 100 150.5 105.5 149" stroke="#fff" strokeWidth="0.8" opacity="0.2" fill="none" strokeLinecap="round" />
 
-        {/* Front hair (swooped) */}
-        <path d="M 58 108 C 54 66 74 46 102 46 C 132 46 148 66 142 106 C 138 86 128 72 112 66 C 100 76 80 82 62 96 Z" fill={url('hair')} />
-        {/* Hair highlight streak over fringe */}
-        <path d="M 96 56 C 82 66 70 80 66 96" fill="none" stroke="#8a5a32" strokeWidth="2.5" opacity="0.45" strokeLinecap="round" />
-        <path d="M 104 52 C 90 62 78 76 72 92" fill="none" stroke="#6a4020" strokeWidth="1.5" opacity="0.3" strokeLinecap="round" />
-        <g fill="none" strokeLinecap="round">
-          <path d="M 112 66 C 102 76 84 82 66 93 M 118 58 C 130 64 138 78 140 96 M 90 52 C 76 58 64 74 62 96 M 104 50 C 90 58 76 72 70 90" stroke="#7a5238" strokeWidth="0.9" opacity="0.7" />
-          <path d="M 122 62 C 132 72 136 86 137 100 M 96 56 C 84 64 72 78 66 94" stroke="#20130c" strokeWidth="0.9" opacity="0.5" />
-          <path d="M 64 98 C 60 116 62 132 58 146" stroke="#3d251a" strokeWidth="0.85" opacity="0.8" />
-          <path d="M 138 100 C 142 118 139 134 143 150" stroke="#3d251a" strokeWidth="0.85" opacity="0.8" />
-        </g>
-        <path d="M 58 108 C 54 66 74 46 102 46 C 132 46 148 66 142 106" fill="none" stroke={INK} strokeWidth="0.95" opacity="0.65" strokeLinecap="round" />
-        <path d="M 100 36 C 57 36 40 70 43 112 C 45 152 34 188 49 214 M 100 36 C 143 36 160 70 157 112 C 155 152 166 188 151 214" fill="none" stroke={INK} strokeWidth="1.05" opacity="0.65" strokeLinecap="round" />
+        {/* Front hair / fringe */}
+        <path d="M 62 94 C 60 58 78 46 100 46 C 122 46 140 58 138 94 C 132 78 120 68 108 64 C 100 73 80 75 66 88 Z"
+          fill={url('hair')} />
+        <path d="M 96 52 C 84 60 74 72 68 88" fill="none" stroke="#7a4a2a" strokeWidth="2.2" opacity="0.45" strokeLinecap="round" />
+        <path d="M 102 50 C 90 58 80 70 74 84" fill="none" stroke="#5a3418" strokeWidth="1.4" opacity="0.28" strokeLinecap="round" />
+        <path d="M 62 94 C 60 58 78 46 100 46 C 122 46 140 58 138 94"
+          fill="none" stroke="#2a1808" strokeWidth="0.65" opacity="0.5" strokeLinecap="round" />
+
+        {/* Professional updo bun */}
+        <ellipse cx="100" cy="37" rx="21" ry="16" fill={url('hair')} />
+        <ellipse cx="100" cy="37" rx="21" ry="16" fill={url('hair-hi')} opacity="0.36" />
+        <path d="M 82 36 Q 100 30 118 36" fill="none" stroke="#6a4028" strokeWidth="1.0" opacity="0.52" strokeLinecap="round" />
+        <path d="M 80 40 Q 100 34 120 40" fill="none" stroke="#3a2010" strokeWidth="0.9" opacity="0.36" strokeLinecap="round" />
+        {/* Gold hair clip */}
+        <rect x="87" y="35.5" width="26" height="4.5" rx="2.2" fill={url('gold')} />
+        <path d="M 89 38 L 111 38" stroke="#f0d870" strokeWidth="0.6" opacity="0.58" />
+        <circle cx="100" cy="37.7" r="1.5" fill="#f8e890" opacity="0.85" />
+        {/* Face-framing tendrils */}
+        <path d="M 64 90 C 64 76 68 64 74 60" fill="none" stroke="#2c1810" strokeWidth="1.0" opacity="0.52" strokeLinecap="round" />
+        <path d="M 136 90 C 136 76 132 64 126 60" fill="none" stroke="#2c1810" strokeWidth="1.0" opacity="0.52" strokeLinecap="round" />
+        {/* Back-hair outline */}
+        <path d="M 100 28 C 56 28 36 62 36 98 C 36 136 42 168 50 194 M 100 28 C 144 28 164 62 164 98 C 164 136 158 168 150 194"
+          fill="none" stroke="#2a1808" strokeWidth="0.82" opacity="0.48" strokeLinecap="round" />
       </g>
 
-      {/* ═══════════════ ARMS (above everything, never hidden by hair) ═══════════════ */}
+      {/* ═══ ARMS ═══ */}
       <g>
         <g ref={armLRef} opacity="0">
-          <g transform="matrix(-1 0 0 1 200 0)">{armShape}</g>
+          <g transform="matrix(-1 0 0 1 200 0)">{makeArm(true)}</g>
         </g>
-        <g ref={armRRef} opacity="0">{armShape}</g>
+        <g ref={armRRef} opacity="0">{makeArm(false)}</g>
       </g>
     </svg>
   );
