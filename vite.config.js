@@ -5,7 +5,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   // Live avatar token server (server/avatar-server.mjs) — keeps the API key off the client.
-  server: { proxy: { '/api': 'http://localhost:8787' } },
+  // `port` reads $PORT so the dev-server launcher's autoPort assignment is honored;
+  // without this Vite silently falls back to its own default (5173) instead.
+  server: { port: Number(process.env.PORT) || 5176, proxy: { '/api': 'http://localhost:8787' } },
   optimizeDeps: {
     // Pre-bundle these together so TalkingHead and RealisticAvatar share one
     // copy of three.js (the avatar patches GLTFLoader to add meshopt support).
