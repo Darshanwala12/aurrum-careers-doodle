@@ -48,10 +48,40 @@
 }
 @keyframes aurrum-pulse { 0%, 100% { opacity: 0.5; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1); } }
 
-/* Mobile compact bar: the 3D canvas at icon size (replaces the old SVG icon). */
+/* Mobile: the 3D canvas at icon size, used both by the floating launcher
+   and the sheet header (replaces the old full-width bar's SVG icon). */
 .aurrum-ai-character__bar-avatar { position: relative; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
 .aurrum-ai-character__bar-avatar .aurrum-ai-character__3d { position: absolute; inset: 0; opacity: 1; }
 .aurrum-ai-character__bar-avatar .aurrum-ai-character__3d canvas { width: 100% !important; height: 100% !important; }
+
+/* Floating chat launcher — standard chatbot-widget position (fixed,
+   bottom-right), minimal: just the avatar in a circle + a busy pulse dot.
+   Replaces the old full-width top bar entirely. */
+.aurrum-ai-character__launcher {
+  position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  width: 3.4rem; height: 3.4rem; border-radius: 50%; padding: 0; border: 1px solid var(--line);
+  background: var(--paper); box-shadow: 0 10px 28px -12px rgba(0, 0, 0, 0.35); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; overflow: visible;
+}
+.aurrum-ai-character__launcher .aurrum-ai-character__bar-avatar { width: 100%; height: 100%; }
+.aurrum-ai-character__launcher-dot {
+  position: absolute; top: -2px; right: -2px; width: 0.75rem; height: 0.75rem; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--paper); animation: aurrum-pulse 1.2s ease-in-out infinite;
+}
+@media (min-width: 900px) { .aurrum-ai-character__launcher { display: none; } }
+
+/* Chat sheet header: avatar thumb + name/status + close — a minimal
+   chatbot-style title bar instead of the avatar floating loose in the panel. */
+.aurrum-ai-character__sheet-head {
+  display: flex; align-items: center; gap: 0.7rem; width: 100%; max-width: 440px;
+  padding-bottom: 0.6rem; margin-bottom: 0.2rem; border-bottom: 1px solid var(--line);
+}
+.aurrum-ai-character__sheet-head-avatar { width: 2.6rem; height: 2.6rem; flex-shrink: 0; }
+.aurrum-ai-character__sheet-head-avatar .aurrum-ai-character__bar-avatar { width: 100%; height: 100%; }
+.aurrum-ai-character__sheet-head-text { display: flex; flex-direction: column; text-align: left; min-width: 0; }
+.aurrum-ai-character__sheet-head-text strong { font-family: var(--font-display); font-size: 1rem; color: var(--ink); }
+.aurrum-ai-character__sheet-head-text span { font-size: 0.75rem; color: var(--muted); }
+.aurrum-ai-character--sheet .aurrum-ai-character__close { position: static; margin-left: auto; }
 
 .aurrum-ai-character__accent {
   position: absolute; left: -26px; top: 12%; width: 42px; color: var(--accent);

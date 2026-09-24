@@ -13,7 +13,7 @@
   --font-body: 'Inter', system-ui, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --header-h: 3.6rem;
-  --avatarbar-h: 5.8rem;
+  --avatarbar-h: 2.6rem;
   --paper-rgb: 241, 236, 234;
   color-scheme: light;
 }
@@ -187,14 +187,11 @@ p { color: var(--muted); margin: 0 0 1rem; }
 
 .story__avatar-col { position: relative; min-width: 0; }
 @media (min-width: 900px) {
-  /* Character on the right, content scrolls on the left — `order` swaps the
-     visual position without touching source order (keeps DOM/tab order
-     content-first, which is also the more sensible reading order). */
+  /* Character stays on the left; content scrolls on the right. */
   .story__avatar-col {
     position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
-    display: flex; overflow: hidden; order: 2;
+    display: flex; overflow: hidden;
   }
-  .story__track { order: 1; }
 }
 
 .companion-stage {
@@ -212,18 +209,17 @@ p { color: var(--muted); margin: 0 0 1rem; }
   .companion-stage { gap: 0.55rem; padding-top: 0.6rem; padding-bottom: 0.6rem; }
 }
 @media (max-width: 899px) {
+  /* Minimal: just the section-jump strip stays pinned. Elena moves to a
+     floating chat launcher (bottom-right) instead of a full-width bar, so
+     content gets the freed vertical space back. */
   .companion-stage {
     position: fixed; top: var(--header-h); left: 0; right: 0; height: var(--avatarbar-h); z-index: 20;
-    display: flex; flex-direction: column; align-items: stretch; gap: 0.35rem;
+    display: flex; align-items: center;
     background: rgba(var(--paper-rgb), 0.96); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--line); padding: 0.5rem 0.8rem; text-align: left;
     overflow: hidden;
   }
-  .companion-stage__row { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
-  .companion-stage__figure { flex-shrink: 0; }
-  .companion-stage__figure svg { width: 40px; height: 64px; }
-  .companion-stage__caption { flex: 1 1 auto; min-width: 0; }
-  .voice-mode { flex-shrink: 0; }
+  .companion-stage > .aurrum-ai-character { display: contents; } /* the Suspense wrapper takes no layout space */
   .companion-stage__followup, .question-chips, .a11y-bar { display: none; }
 }
 

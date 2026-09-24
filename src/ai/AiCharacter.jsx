@@ -305,16 +305,17 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
     </>
   );
 
-  // Mobile/tablet: the existing compact top bar stays, with a button that
-  // opens a full-height sheet so the face and gestures stay clearly visible.
+  // Mobile/tablet: a minimal floating chat-launcher (no reserved top-bar
+  // space — content uses the full screen) that opens a full-height chat
+  // sheet with its own header, matching a standard chatbot pattern.
   if (compact) {
     return (
-      <div className="aurrum-ai-character aurrum-ai-character--bar">
+      <>
         <button
           type="button"
-          className="aurrum-ai-character__bar-open"
+          className="aurrum-ai-character__launcher"
           onClick={() => setExpanded(true)}
-          aria-label="Open conversation with Elena"
+          aria-label="Talk to Elena, your Aurrum career advisor"
           aria-expanded={expanded}
         >
           {webglOK ? (
@@ -326,23 +327,34 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           ) : (
             <span className="aurrum-ai-character__fallback-pulse" />
           )}
+          {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
         </button>
-        {captionsOn && (
-          <p className="aurrum-ai-character__bar-caption" aria-live="polite">
-            {ai.status === 'thinking' ? 'Thinking…' : ai.status === 'listening' ? (ai.interim || 'Listening…') : caption}
-          </p>
-        )}
-        <button type="button" className="aurrum-ai-character__bar-ask" onClick={() => setExpanded(true)}>
-          Ask
-        </button>
+
         {expanded && createPortal(
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
-            <button type="button" className="aurrum-ai-character__close" onClick={() => setExpanded(false)} aria-label="Close conversation">✕</button>
+            <div className="aurrum-ai-character__sheet-head">
+              <div className="aurrum-ai-character__sheet-head-avatar">
+                {webglOK ? (
+                  <div className="aurrum-ai-character__bar-avatar">
+                    <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
+                      <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} />
+                    </Suspense>
+                  </div>
+                ) : (
+                  <span className="aurrum-ai-character__fallback-pulse" />
+                )}
+              </div>
+              <div className="aurrum-ai-character__sheet-head-text">
+                <strong>Elena</strong>
+                <span>{ai.status === 'thinking' ? 'Thinking…' : ai.status === 'listening' ? 'Listening…' : 'Aurrum career advisor'}</span>
+              </div>
+              <button type="button" className="aurrum-ai-character__close" onClick={() => setExpanded(false)} aria-label="Close conversation">✕</button>
+            </div>
             {full}
           </div>,
           document.body
         )}
-      </div>
+      </>
     );
   }
 
