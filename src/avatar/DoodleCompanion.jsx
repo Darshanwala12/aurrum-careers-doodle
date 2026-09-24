@@ -9,9 +9,9 @@ const mouthPath = (w, lift, top, bottom) =>
   `M ${100 - w} ${MY - lift} Q 100 ${MY + lift * 0.5 - 1 - top} ${100 + w} ${MY - lift} Q 100 ${MY + lift * 0.5 + 2 + bottom} ${100 - w} ${MY - lift} Z`;
 
 const REST = {
-  friendly: [14.5, 3.4, 1.6], explaining: [14, 2.2, 1.4], concerned: [12, -1.6, 1.3],
-  confident: [15, 3.2, 1.4], calm: [13, 1.8, 1.4], motivating: [16.5, 4.4, 3.5],
-  curious: [11.5, 1.2, 1.4], serious: [13, 0, 1], surprised: [7.5, 0, 6.5],
+  friendly:   [14.5, 3.4, 1.6], explaining: [14, 2.2, 1.4], concerned: [12, -1.6, 1.3],
+  confident:  [15, 3.2, 1.4],   calm:        [13, 1.8, 1.4], motivating: [16.5, 4.4, 3.5],
+  curious:    [11.5, 1.2, 1.4], serious:     [13, 0, 1],     surprised:  [7.5, 0, 6.5],
 };
 const VISEME = {
   sil: null, PP: [13, 0, 0.4], FF: [13, 0, 3.2], nn: [13, 0.5, 3.5],
@@ -117,9 +117,9 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
   // Idle breathing + head sway
   useEffect(() => {
     if (!headRef.current || !torsoRef.current) return;
-    const h = gsap.to(headRef.current,  { rotate: 1.5,   svgOrigin: '100 200', duration: 3.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    const b = gsap.to(torsoRef.current, { scaleY: 1.013,  svgOrigin: '100 260', duration: 2.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    const s = gsap.to(torsoRef.current, { rotate: 0.45,   svgOrigin: '100 260', duration: 4.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.1 });
+    const h = gsap.to(headRef.current,  { rotate: 1.5,  svgOrigin: '100 200', duration: 3.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    const b = gsap.to(torsoRef.current, { scaleY: 1.013, svgOrigin: '100 260', duration: 2.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    const s = gsap.to(torsoRef.current, { rotate: 0.45,  svgOrigin: '100 260', duration: 4.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.1 });
     return () => { h.kill(); b.kill(); s.kill(); };
   }, []);
 
@@ -142,7 +142,7 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
     const orig   = ref => ref === armLRef ? '62 228' : '138 228';
     const mirror = (ref, p) => ref === armLRef ? { ...p, rotate: -p.rotate } : p;
     const pose   = ARM_POSE[arm] ?? ARM_HIDDEN;
-    gsap.to(active.current, { ...mirror(active, pose),    svgOrigin: orig(active), duration: 0.65, ease: 'back.out(1.6)' });
+    gsap.to(active.current, { ...mirror(active, pose),     svgOrigin: orig(active), duration: 0.65, ease: 'back.out(1.6)' });
     gsap.to(idle.current,   { ...mirror(idle, ARM_HIDDEN), svgOrigin: orig(idle),   duration: 0.38, ease: 'power2.in' });
     if (wIdle.current) gsap.to(wIdle.current, { rotate: 0, duration: 0.3 });
 
@@ -249,12 +249,13 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         fill={url('blazer-arm')} />
       <path d="M 134 221 Q 152 220.5 168 222.5 M 134 234.5 Q 152 234 168 232"
         fill="none" stroke="#4a8ab0" strokeWidth="0.6" opacity="0.18" strokeLinecap="round" />
+      {/* White shirt cuff */}
       <path d="M 169 222 L 174 222.5 Q 177 227 174 232.5 L 169 233 Z"
         fill="#f8f4ee" stroke="#d0c8bc" strokeWidth="0.55" />
       {/* Gold cufflink */}
       <ellipse cx="172" cy="227.5" rx="2.2" ry="2.8" fill={url('gold')} />
       <ellipse cx="171.5" cy="226.8" rx="0.9" ry="1.1" fill="#f8e890" opacity="0.9" />
-      {/* Watch on left arm */}
+      {/* Watch on left arm (before mirroring it sits at same x range) */}
       {isLeft && (
         <g>
           <rect x="168.5" y="224.5" width="7" height="6" rx="1.5" fill="#0e2d4a" stroke={url('gold')} strokeWidth="0.65" />
@@ -299,7 +300,7 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
   );
 
   return (
-    <svg ref={svgRef} viewBox="0 0 200 320" width={size} height={size * 1.6}
+    <svg ref={svgRef} viewBox="0 0 200 380" width={size} height={size * 1.9}
       role="img" aria-label={`Elena, Aurrum career advisor — ${expression}`}>
       <defs>
         {/* Skin */}
@@ -341,6 +342,12 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
           <stop offset="0%"   stopColor="#1e5575" />
           <stop offset="100%" stopColor="#0c3452" />
         </linearGradient>
+        {/* Trousers — matching deep navy, slightly richer */}
+        <linearGradient id={id('trouser')} x1="0.1" y1="0" x2="0.35" y2="1">
+          <stop offset="0%"   stopColor="#0f2840" />
+          <stop offset="50%"  stopColor="#081a2c" />
+          <stop offset="100%" stopColor="#040e1a" />
+        </linearGradient>
         {/* Shirt */}
         <linearGradient id={id('shirt')} x1="0" y1="0" x2="0.5" y2="1">
           <stop offset="0%"   stopColor="#ffffff" />
@@ -355,6 +362,11 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         <linearGradient id={id('gold')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#eacb6a" />
           <stop offset="100%" stopColor="#b88828" />
+        </linearGradient>
+        {/* Shoes — dark premium */}
+        <linearGradient id={id('shoe')} x1="0" y1="0" x2="0.25" y2="1">
+          <stop offset="0%"   stopColor="#182a3e" />
+          <stop offset="100%" stopColor="#04080e" />
         </linearGradient>
         {/* Eyes */}
         <radialGradient id={id('iris')} cx="36%" cy="32%" r="64%">
@@ -403,35 +415,77 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
       {/* Ambient studio glow */}
       <ellipse cx="100" cy="82" rx="88" ry="106" fill={url('glow')} />
 
+      {/* ═══ SHOES — rendered first (bottom layer) ═══ */}
+      <g>
+        {/* Left shoe — pointed-toe pump */}
+        <rect x="65" y="368" width="5" height="12" rx="1.2" fill="#04080e" />
+        <path d="M 65 368 Q 78 362 93 366 L 95 369 Q 95 375 92 376 Q 76 379 65 376 Z"
+          fill={url('shoe')} />
+        <path d="M 69 363 Q 82 360 91 364" fill="none" stroke="#2a4a68" strokeWidth="0.8" opacity="0.45" strokeLinecap="round" />
+        <ellipse cx="92.5" cy="369.5" rx="2.2" ry="1.3" fill="#1a3252" opacity="0.55" />
+        {/* Right shoe — mirrored */}
+        <rect x="130" y="368" width="5" height="12" rx="1.2" fill="#04080e" />
+        <path d="M 135 368 Q 122 362 107 366 L 105 369 Q 105 375 108 376 Q 124 379 135 376 Z"
+          fill={url('shoe')} />
+        <path d="M 131 363 Q 118 360 109 364" fill="none" stroke="#2a4a68" strokeWidth="0.8" opacity="0.45" strokeLinecap="round" />
+        <ellipse cx="107.5" cy="369.5" rx="2.2" ry="1.3" fill="#1a3252" opacity="0.55" />
+      </g>
+
+      {/* ═══ TROUSERS ═══ */}
+      <g>
+        {/* Left leg */}
+        <path d="M 65 294 L 100 294 L 98 368 Q 86 372 68 368 Z" fill={url('trouser')} />
+        {/* Right leg */}
+        <path d="M 100 294 L 135 294 L 132 368 Q 118 372 102 368 Z" fill={url('trouser')} />
+        {/* Center crease — subtle front pleat */}
+        <line x1="82" y1="295" x2="82" y2="368" stroke="#1c3c5c" strokeWidth="0.65" opacity="0.38" strokeLinecap="round" />
+        <line x1="118" y1="295" x2="118" y2="368" stroke="#1c3c5c" strokeWidth="0.65" opacity="0.38" strokeLinecap="round" />
+        {/* Side seam depth */}
+        <path d="M 66 295 L 68 368" stroke="#030a14" strokeWidth="1.1" opacity="0.4" strokeLinecap="round" />
+        <path d="M 134 295 L 132 368" stroke="#030a14" strokeWidth="1.1" opacity="0.4" strokeLinecap="round" />
+        {/* Fabric sheen highlights */}
+        <path d="M 76 296 Q 77 330 77 366" stroke="#1e4a6a" strokeWidth="1.6" opacity="0.2" fill="none" strokeLinecap="round" />
+        <path d="M 123 296 Q 123 330 122 366" stroke="#1e4a6a" strokeWidth="1.6" opacity="0.2" fill="none" strokeLinecap="round" />
+        {/* Inner leg shadow */}
+        <path d="M 98 295 L 100 368 L 102 368 L 100 295 Z" fill="#030a14" opacity="0.35" />
+      </g>
+
       {/* ═══ BODY ═══ */}
       <g ref={torsoRef}>
-        <path d="M 36 320 Q 38 242 64 208 Q 80 196 100 194 Q 120 196 136 208 Q 162 242 164 320 Z"
+        {/* Main blazer body — hip-length professional cut */}
+        <path d="M 38 297 Q 40 241 64 210 Q 80 198 100 196 Q 120 198 136 210 Q 160 241 162 297 Z"
           fill={url('blazer')} />
         {/* Side depth shadows */}
-        <path d="M 36 320 Q 38 268 50 240 Q 60 222 70 212 L 76 216 Q 64 232 56 258 Q 46 284 44 320 Z"
+        <path d="M 38 297 Q 40 265 50 242 Q 60 224 70 214 L 76 218 Q 64 234 56 258 Q 46 280 44 297 Z"
           fill="#030d1a" opacity="0.42" />
-        <path d="M 164 320 Q 162 268 150 240 Q 140 222 130 212 L 124 216 Q 136 232 144 258 Q 154 284 156 320 Z"
+        <path d="M 162 297 Q 160 265 150 242 Q 140 224 130 214 L 124 218 Q 136 234 144 258 Q 154 280 156 297 Z"
           fill="#030d1a" opacity="0.42" />
         {/* Centre chest highlight */}
-        <path d="M 97 196 Q 100 310 100 320 L 103 320 Q 103 310 100 196 Z" fill="#2a5e84" opacity="0.28" />
-        {/* White shirt */}
-        <path d="M 80 202 L 100 272 L 120 202 Q 110 196 100 194 Q 90 196 80 202 Z"
+        <path d="M 97 197 Q 100 290 100 297 L 103 297 Q 103 290 100 197 Z" fill="#2a5e84" opacity="0.26" />
+        {/* White shirt / blouse */}
+        <path d="M 80 202 L 100 268 L 120 202 Q 110 196 100 196 Q 90 196 80 202 Z"
           fill={url('shirt')} />
-        <path d="M 100 202 L 100 272" stroke="#ccc6b8" strokeWidth="0.8" opacity="0.7" />
+        {/* Shirt placket line */}
+        <path d="M 100 202 L 100 268" stroke="#ccc6b8" strokeWidth="0.8" opacity="0.7" />
+        {/* Shirt buttons */}
         <circle cx="100" cy="220" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
         <circle cx="100" cy="236" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
         <circle cx="100" cy="252" r="1.8" fill="#dcd4c6" stroke="#b8b0a0" strokeWidth="0.45" />
         {/* Collar */}
-        <path d="M 80 202 L 87 194 L 100 210 L 113 194 L 120 202 L 100 272 Z"
+        <path d="M 80 202 L 87 194 L 100 210 L 113 194 L 120 202 L 100 268 Z"
           fill={url('shirt')} />
         <path d="M 87 194 L 100 218 M 113 194 L 100 218"
           stroke="#ccc6b8" strokeWidth="0.6" opacity="0.65" />
+        {/* Gold necklace — visible at collar */}
+        <path d="M 88 197 Q 100 205 112 197" fill="none" stroke={url('gold')} strokeWidth="1.1" opacity="0.8" strokeLinecap="round" />
+        <circle cx="100" cy="205" r="2.2" fill={url('gold')} opacity="0.82" />
+        <circle cx="99.4" cy="204.4" r="0.9" fill="#f8e890" opacity="0.88" />
         {/* Lapels */}
-        <path d="M 80 202 L 100 272 L 88 292 L 56 248 Q 54 230 64 212 Z"
+        <path d="M 80 202 L 100 268 L 90 290 L 58 248 Q 55 230 64 212 Z"
           fill={url('blazer-lapel')} />
-        <path d="M 120 202 L 100 272 L 112 292 L 144 248 Q 146 230 136 212 Z"
+        <path d="M 120 202 L 100 268 L 110 290 L 142 248 Q 145 230 136 212 Z"
           fill={url('blazer-lapel')} />
-        <path d="M 64 214 L 90 292 M 136 214 L 110 292"
+        <path d="M 64 215 L 90 290 M 136 215 L 110 290"
           stroke="#4a9ac0" strokeWidth="0.6" opacity="0.18" strokeLinecap="round" />
         {/* Teal pocket square */}
         <path d="M 118 246 L 134 243 L 135 252 L 122 254 Z" fill={url('teal')} opacity="0.9" />
@@ -442,8 +496,31 @@ export default function DoodleCompanion({ state = 'idle', speaking = false, size
         <text x="120" y="237.2" textAnchor="middle" fontSize="3.8" fill="#7a5010"
           fontFamily="Georgia,serif" fontWeight="bold">A</text>
         {/* Blazer buttons */}
-        <circle cx="100" cy="286" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
-        <circle cx="100" cy="272" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
+        <circle cx="100" cy="278" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
+        <circle cx="100" cy="264" r="2.8" fill="#0a2c46" stroke="#1a4c6a" strokeWidth="0.6" />
+
+        {/* Portfolio / notepad prop — right side, tucked */}
+        <g opacity="0.9">
+          <rect x="128" y="236" width="22" height="32" rx="2.5" fill="#081422" stroke="#14304e" strokeWidth="0.85" />
+          <rect x="130" y="238" width="18" height="28" rx="1.8" fill="#0c1e30" />
+          <path d="M 132 243 L 146 243 M 132 247 L 146 247 M 132 251 L 142 251 M 132 255 L 145 255"
+            stroke="#1a4060" strokeWidth="0.58" opacity="0.75" fill="none" strokeLinecap="round" />
+          <path d="M 132 259 L 140 259" stroke="#14b8a6" strokeWidth="0.62" opacity="0.65" fill="none" strokeLinecap="round" />
+          {/* Gold corner accents */}
+          <circle cx="130" cy="238" r="1.4" fill={url('gold')} opacity="0.65" />
+          <circle cx="130" cy="266" r="1.4" fill={url('gold')} opacity="0.65" />
+          {/* Spine */}
+          <rect x="128" y="236" width="4" height="32" rx="1" fill="#06101e" opacity="0.65" />
+        </g>
+      </g>
+
+      {/* ═══ BELT ═══ */}
+      <g>
+        <rect x="62" y="290" width="76" height="6" rx="1.2" fill="#060e1a" stroke="#0e1e2e" strokeWidth="0.5" />
+        {/* Gold buckle */}
+        <rect x="94" y="289" width="12" height="8" rx="1.8" fill="#091626" stroke={url('gold')} strokeWidth="0.9" />
+        <rect x="96.5" y="291" width="7" height="4" rx="0.8" fill="#060e1a" />
+        <line x1="100" y1="289.5" x2="100" y2="296.5" stroke={url('gold')} strokeWidth="0.85" />
       </g>
 
       {/* ═══ HEAD ═══ */}
