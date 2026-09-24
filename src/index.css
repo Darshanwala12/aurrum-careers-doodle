@@ -189,10 +189,17 @@ p { color: var(--muted); margin: 0 0 1rem; }
 
 .story__avatar-col { position: relative; min-width: 0; }
 @media (min-width: 900px) {
-  /* Character stays on the left; content scrolls on the right. */
+  /* Character stays on the left; content scrolls on the right.
+     will-change + contain ensure the browser composites this into its own
+     layer so stickiness is never interrupted by ancestor repaints. */
   .story__avatar-col {
-    position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
+    position: sticky; top: var(--header-h);
+    height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
     display: flex; overflow: hidden;
+    will-change: transform;
+    contain: layout style paint;
+    /* Soft radial studio-light backdrop for premium feel */
+    background: radial-gradient(ellipse 80% 70% at 50% 30%, rgba(255,248,240,0.55) 0%, transparent 75%);
   }
 }
 
