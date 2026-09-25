@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useNarration } from '../avatar/useNarration.js';
 import { personas } from '../data/scenes.js';
-import DoodleCompanion from '../avatar/CartoonCompanion.jsx';
+import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
 
 const LINE_1 = "Hi. I'm Elena.";
 const LINE_2 = "Tell me where you are in your career, and I'll show you where we can help.";

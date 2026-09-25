@@ -8,7 +8,7 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
-import DoodleCompanion from '../avatar/CartoonCompanion.jsx';
+import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
 import './aurrum-ai-character.css';
 
 const HIGHLIGHT_CLASS = 'aurrum-ai-character-highlight';
