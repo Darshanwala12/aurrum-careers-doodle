@@ -8,13 +8,16 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
+import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 
-// three.js + TalkingHead (~700 KB) load in their own chunk after the panel is up.
+// Illustrated Elena (DoodleCompanion) is the primary avatar: hand-crafted
+// full-body outfit detail (blazer, trousers, shoes, belt, necklace) that a
+// generic 3D model's material tints can't reach. The 3D model
+// (public/avatars/elena.glb) is kept as an opt-in alternative, not shown by
+// default — see USE_3D below.
 const RealisticAvatar = lazy(() => import('./components/RealisticAvatar.jsx'));
-// The 3D model (public/avatars/elena.glb) is the avatar everywhere now.
-// WebGL is still required to render it — on a browser without WebGL there is
-// no way to show it, so that one case keeps the illustrated SVG as a floor.
-const webglOK = (() => {
+const USE_3D = false;
+const webglOK = USE_3D && (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
   catch { return false; }
 })();
@@ -176,12 +179,12 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Live video of Elena, your Aurrum career advisor"
           />
         )}
-        {/* While the 3D model loads (or on the rare browser with no WebGL at
-            all), show a neutral placeholder rather than the old illustration —
-            the 3D avatar is what's meant to be shown everywhere now. */}
-        {avatar3d !== 'ready' && !live.isLive && (
-          <div className="aurrum-ai-character__fallback aurrum-ai-character__fallback--placeholder" style={{ width: size, height: size }} aria-hidden="true">
-            <span className="aurrum-ai-character__fallback-pulse" />
+        {/* Illustrated Elena — the primary avatar. Renders immediately (no
+            async model load), so it's shown whenever the 3D/live paths
+            aren't active. */}
+        {!(webglOK && avatar3d === 'ready') && !live.isLive && (
+          <div className="aurrum-ai-character__fallback">
+            <DoodleCompanion state={state} speaking={speaking && !paused} size={size} text={lineText} />
           </div>
         )}
         <svg className="aurrum-ai-character__accent" viewBox="0 0 60 30" aria-hidden="true">
@@ -328,15 +331,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Talk to Elena, your Aurrum career advisor"
             aria-expanded={expanded}
           >
-            {webglOK ? (
-              <div className="aurrum-ai-character__bar-avatar">
-                <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
-                  <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} cameraView="head" />
-                </Suspense>
-              </div>
-            ) : (
-              <span className="aurrum-ai-character__fallback-pulse" />
-            )}
+            <DoodleCompanion state={state} speaking={speaking && !paused} size={40} />
             {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
           </button>,
           document.body
@@ -346,15 +341,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
             <div className="aurrum-ai-character__sheet-head">
               <div className="aurrum-ai-character__sheet-head-avatar">
-                {webglOK ? (
-                  <div className="aurrum-ai-character__bar-avatar">
-                    <Suspense fallback={<span className="aurrum-ai-character__fallback-pulse" />}>
-                      <RealisticAvatar state={state} speaking={speaking && !paused} text={lineText} cameraView="head" />
-                    </Suspense>
-                  </div>
-                ) : (
-                  <span className="aurrum-ai-character__fallback-pulse" />
-                )}
+                <DoodleCompanion state={state} speaking={speaking && !paused} size={42} />
               </div>
               <div className="aurrum-ai-character__sheet-head-text">
                 <strong>Elena</strong>
