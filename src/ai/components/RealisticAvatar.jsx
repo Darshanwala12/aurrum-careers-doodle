@@ -68,7 +68,7 @@ function plan(text, fromWord = 0, msPerWord = null) {
 //  - 'tint': keep the texture (skin shading/detail matters) and multiply it
 //    by a color — shifts tone/warmth without flattening the surface.
 const RECOLOR = {
-  'Human.female_casualsuit01': { mode: 'flatten', hex: 0x1c1e20 }, // blazer → charcoal black
+  'Human.female_casualsuit01': { mode: 'flatten', hex: 0x0b1f3a }, // blazer → deep navy
   'Human.ponytail01': { mode: 'flatten', hex: 0x241c19 }, // hair → deep natural brown
   'Human.body': { mode: 'tint', hex: 0xc98f72 }, // skin → warm medium-light beige
   'Human.high-poly': { mode: 'tint', hex: 0xc98f72 }, // face → same skin tone

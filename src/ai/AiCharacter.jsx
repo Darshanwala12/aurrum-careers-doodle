@@ -10,14 +10,8 @@ import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
 import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 
-// Illustrated Elena (DoodleCompanion) is the primary avatar: hand-crafted
-// full-body outfit detail (blazer, trousers, shoes, belt, necklace) that a
-// generic 3D model's material tints can't reach. The 3D model
-// (public/avatars/elena.glb) is kept as an opt-in alternative, not shown by
-// default — see USE_3D below.
 const RealisticAvatar = lazy(() => import('./components/RealisticAvatar.jsx'));
-const USE_3D = false;
-const webglOK = USE_3D && (() => {
+const webglOK = (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
   catch { return false; }
 })();
