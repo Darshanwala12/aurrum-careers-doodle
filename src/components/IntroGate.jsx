@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { useNarration } from '../avatar/useNarration.js';
 import { personas } from '../data/scenes.js';
 import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
-import MichelleAvatar from '../ai/components/MichelleAvatar.jsx';
+import KidAvatar from '../ai/components/KidAvatar.jsx';
 
 const webglOK = (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -62,7 +62,7 @@ export default function IntroGate({ onDone }) {
       <div className="intro-gate__figure">
         {webglOK && avatar3d !== 'failed' && (
           <div className={`aurrum-ai-character__avatar is-3d ${avatar3d === 'ready' ? 'is-ready' : ''}`}>
-            <MichelleAvatar
+            <KidAvatar
               state="greeting"
               speaking={speaking}
               onReady={() => setAvatar3d('ready')}

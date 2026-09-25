@@ -9,7 +9,7 @@ import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
 import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
-import MichelleAvatar from './components/MichelleAvatar.jsx';
+import KidAvatar from './components/KidAvatar.jsx';
 import './aurrum-ai-character.css';
 
 const webglOK = (() => {
@@ -162,7 +162,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           />
         )}
         {!live.isLive && webglOK && avatar3d !== 'failed' && (
-          <MichelleAvatar
+          <KidAvatar
             state={state}
             speaking={speaking && !paused}
             onReady={() => setAvatar3d('ready')}
