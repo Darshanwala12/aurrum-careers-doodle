@@ -21,9 +21,9 @@
 }
 
 :root {
-  --paper: #f1ecea;
-  --paper-2: #e4dfdd;
-  --paper-3: #d8d2cb;
+  --paper: #cbc6b4;
+  --paper-2: #bfbaa7;
+  --paper-3: #b3ad98;
   --ink: #010101;
   --muted: #5f5d5b;
   --accent: #dd5730;
@@ -34,7 +34,7 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --header-h: 3.6rem;
   --avatarbar-h: 2.6rem;
-  --paper-rgb: 241, 236, 234;
+  --paper-rgb: 203, 198, 180;
   color-scheme: light;
 }
 
@@ -59,18 +59,19 @@ html, body { margin: 0; padding: 0; }
    scroll container and breaking `position: sticky` for every descendant.
    This was the actual cause of the avatar column not sticking. */
 html { overflow-x: clip; }
-/* "Arts and Crafts" background — intricate hand-drawn folk motif (an
-   original vine-and-leaf flourish, tiled), layered over a few soft plaster
-   blotches for depth. Pure CSS/inline-SVG so it costs nothing to load and
-   scales cleanly. Opacity kept low so it stays a texture, not a distraction
-   behind body text. */
+/* Plastered-wall / handmade-paper background: fine fractal-noise grain
+   (feTurbulence, tiled) plus a couple of soft light/shadow blotches for
+   depth, over the flat --paper tone. Pure inline-SVG so it costs nothing
+   to load and scales cleanly at any resolution. Opacity kept low so it
+   reads as a physical surface texture, not a pattern competing with
+   body text. */
 body {
   background:
-    radial-gradient(ellipse 900px 700px at 12% 8%, rgba(0, 0, 0, 0.024), transparent 60%),
-    radial-gradient(ellipse 800px 600px at 88% 90%, rgba(0, 0, 0, 0.022), transparent 55%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23010101' stroke-width='1.4' stroke-linecap='round' opacity='0.06'%3E%3Cpath d='M10 70 C 25 40, 55 40, 70 70 C 85 100, 115 100, 130 70'/%3E%3Cpath d='M70 70 C 66 58, 70 50, 78 46'/%3E%3Cpath d='M70 70 C 74 82, 70 90, 62 94'/%3E%3Ccircle cx='24' cy='55' r='2.2'/%3E%3Ccircle cx='116' cy='85' r='2.2'/%3E%3Cpath d='M10 0 C 25 -30, 55 -30, 70 0' transform='translate(0,140)'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse 900px 700px at 12% 8%, rgba(255, 255, 255, 0.05), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 88% 90%, rgba(0, 0, 0, 0.03), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.16'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"),
     var(--paper);
-  background-size: auto, auto, 140px 140px, auto;
+  background-size: auto, auto, 300px 300px, auto;
   background-repeat: no-repeat, no-repeat, repeat, no-repeat;
   background-attachment: fixed, fixed, local, local;
   color: var(--ink);
