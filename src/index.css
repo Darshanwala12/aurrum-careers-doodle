@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap');
+@font-face {
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/coolvetica-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/coolvetica-regular-italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Coolvetica Condensed';
+  src: url('/fonts/coolvetica/coolvetica-condensed.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --paper: #f1ecea;
@@ -9,8 +29,8 @@
   --accent: #dd5730;
   --accent-2: #dd5730;
   --line: rgba(1, 1, 1, 0.12);
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Coolvetica Condensed', 'Coolvetica', sans-serif;
+  --font-body: 'Coolvetica', sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --header-h: 3.6rem;
   --avatarbar-h: 2.6rem;

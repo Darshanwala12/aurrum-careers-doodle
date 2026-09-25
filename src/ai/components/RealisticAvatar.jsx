@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { TalkingHead } from '@met4citizen/talkinghead/modules/talkinghead.mjs';
@@ -92,6 +93,81 @@ function recolor(scene) {
   });
 }
 
+// The GLB has no jewelry or trim geometry (checked via its material list:
+// body, suit, face, eyebrows, hair, teeth, tongue — nothing else), so a gold
+// necklace and a teal accent can't be reached by recoloring an existing
+// material. Add them as small standalone meshes bone-attached at the neck
+// and upper chest instead.
+const GOLD = 0xc9a227;
+const TEAL = 0x14b8a6;
+function addAccessories(scene) {
+  if (!scene) return;
+  let neck = null;
+  let chest = null;
+  let head = null;
+  scene.traverse((obj) => {
+    if (obj.name === 'Neck') neck = obj;
+    if (obj.name === 'Spine2') chest = obj;
+    if (obj.name === 'Head') head = obj;
+  });
+  if (!neck || !chest) return;
+
+  // Bone local axes point along the bone chain (not world XYZ), so placing
+  // accessories in bone-local space puts them in unpredictable spots.
+  // Work in world space instead: read each bone's world position, then
+  // figure out "forward" (the direction the face points) from the
+  // neck→head vector's horizontal component, so accessories sit in front
+  // of the body regardless of which way the rig's local axes point.
+  const neckPos = new THREE.Vector3();
+  const chestPos = new THREE.Vector3();
+  const headPos = new THREE.Vector3();
+  neck.getWorldPosition(neckPos);
+  chest.getWorldPosition(chestPos);
+  (head ?? neck).getWorldPosition(headPos);
+
+  let forward = new THREE.Vector3(headPos.x - neckPos.x, 0, headPos.z - neckPos.z);
+  if (forward.lengthSq() < 1e-6) forward.set(0, 0, 1);
+  forward.normalize();
+  const up = new THREE.Vector3(0, 1, 0);
+  const right = new THREE.Vector3().crossVectors(up, forward).normalize();
+  const faceAngle = Math.atan2(forward.x, forward.z);
+
+  const necklace = new THREE.Mesh(
+    new THREE.TorusGeometry(0.045, 0.004, 8, 24, Math.PI * 1.15),
+    new THREE.MeshStandardMaterial({ color: GOLD, metalness: 0.85, roughness: 0.3 }),
+  );
+  necklace.position.copy(neckPos).addScaledVector(forward, 0.03).addScaledVector(up, -0.05);
+  necklace.rotation.set(Math.PI / 2, faceAngle, 0);
+  necklace.name = 'aurrum-necklace';
+  scene.add(necklace);
+
+  const pendant = new THREE.Mesh(
+    new THREE.SphereGeometry(0.01, 12, 12),
+    new THREE.MeshStandardMaterial({ color: TEAL, metalness: 0.2, roughness: 0.25 }),
+  );
+  pendant.position.copy(neckPos).addScaledVector(forward, 0.055).addScaledVector(up, -0.1);
+  pendant.name = 'aurrum-pendant';
+  scene.add(pendant);
+
+  const pin = new THREE.Mesh(
+    new THREE.CircleGeometry(0.012, 20),
+    new THREE.MeshStandardMaterial({ color: GOLD, metalness: 0.85, roughness: 0.3, side: THREE.DoubleSide }),
+  );
+  pin.position.copy(chestPos).addScaledVector(forward, 0.09).addScaledVector(right, -0.08).addScaledVector(up, 0.03);
+  pin.rotation.set(0, faceAngle, 0);
+  pin.name = 'aurrum-pin';
+  scene.add(pin);
+
+  const pocketSquare = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.05, 0.03),
+    new THREE.MeshStandardMaterial({ color: TEAL, metalness: 0, roughness: 0.8, side: THREE.DoubleSide }),
+  );
+  pocketSquare.position.copy(chestPos).addScaledVector(forward, 0.095).addScaledVector(right, 0.09).addScaledVector(up, -0.02);
+  pocketSquare.rotation.set(0.1, faceAngle, 0.05);
+  pocketSquare.name = 'aurrum-pocket-square';
+  scene.add(pocketSquare);
+}
+
 // Valid TalkingHead views, widest to tightest: 'full' (full body — desktop
 // story/chat), 'mid' (half body — mobile chat sheet), 'upper' (chest up),
 // 'head' (headshot — launcher/thumbnail icon sizes where anything wider is
@@ -137,6 +213,7 @@ export default function RealisticAvatar({ state = STATES.IDLE, speaking = false,
       .then(() => {
         if (disposed) return;
         recolor(head.scene);
+        addAccessories(head.scene);
         setReady(true);
         onReady?.();
       })
