@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNarration } from '../avatar/useNarration.js';
 import { scrollToId } from '../animations/useSmoothScroll.js';
@@ -8,13 +8,7 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
-import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
-
-const RealisticAvatar = lazy(() => import('./components/RealisticAvatar.jsx'));
-const webglOK = (() => {
-  try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
-  catch { return false; }
-})();
+import CharacterAvatar from '../avatar/CharacterAvatar.jsx';
 import './aurrum-ai-character.css';
 
 const HIGHLIGHT_CLASS = 'aurrum-ai-character-highlight';
@@ -47,7 +41,6 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const [expanded, setExpanded] = useState(false);
   const [draft, setDraft] = useState('');
   const [showHistory, setShowHistory] = useState(false);
-  const [avatar3d, setAvatar3d] = useState('loading'); // loading | ready | failed
   const inputRef = useRef(null);
   const logRef = useRef(null);
 
@@ -150,19 +143,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   // narrow phone-width column, and would risk cropping into the composer.
   const figure = (size) => (
     <div className={`aurrum-ai-character__stage aurrum-ai-character__stage--${ai.status}`}>
-      <div className={`aurrum-ai-character__avatar ${webglOK && avatar3d !== 'failed' ? 'is-3d' : ''} ${avatar3d === 'ready' ? 'is-ready' : ''} ${live.isLive ? 'is-live' : ''}`}>
-        {webglOK && avatar3d !== 'failed' && (
-          <Suspense fallback={null}>
-            <RealisticAvatar
-              state={state}
-              speaking={speaking && !paused}
-              text={lineText}
-              cameraView={compact ? 'mid' : 'full'}
-              onReady={() => setAvatar3d('ready')}
-              onError={(err) => { console.warn('[Elena 3D] falling back to illustration:', err); setAvatar3d('failed'); }}
-            />
-          </Suspense>
-        )}
+      <div className={`aurrum-ai-character__avatar ${live.isLive ? 'is-live' : ''}`}>
         {/* Photoreal live Elena (Anam cara-4 WebRTC stream). */}
         {live.status !== 'unavailable' && (
           <video
@@ -173,12 +154,9 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Live video of Elena, your Aurrum career advisor"
           />
         )}
-        {/* Illustrated Elena — the primary avatar. Renders immediately (no
-            async model load), so it's shown whenever the 3D/live paths
-            aren't active. */}
-        {!(webglOK && avatar3d === 'ready') && !live.isLive && (
+        {!live.isLive && (
           <div className="aurrum-ai-character__fallback">
-            <DoodleCompanion state={state} speaking={speaking && !paused} size={size} text={lineText} />
+            <CharacterAvatar state={state} speaking={speaking && !paused} size={size} />
           </div>
         )}
         <svg className="aurrum-ai-character__accent" viewBox="0 0 60 30" aria-hidden="true">
@@ -325,7 +303,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Talk to Elena, your Aurrum career advisor"
             aria-expanded={expanded}
           >
-            <DoodleCompanion state={state} speaking={speaking && !paused} size={40} />
+            <CharacterAvatar state={state} speaking={speaking && !paused} size={40} />
             {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
           </button>,
           document.body
@@ -335,7 +313,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
             <div className="aurrum-ai-character__sheet-head">
               <div className="aurrum-ai-character__sheet-head-avatar">
-                <DoodleCompanion state={state} speaking={speaking && !paused} size={42} />
+                <CharacterAvatar state={state} speaking={speaking && !paused} size={42} />
               </div>
               <div className="aurrum-ai-character__sheet-head-text">
                 <strong>Elena</strong>

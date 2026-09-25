@@ -1,0 +1,119 @@
+.character-avatar {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.character-avatar__tilt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.25s var(--ease, ease-out);
+  animation: char-idle 4.5s ease-in-out infinite;
+}
+
+.character-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  border-radius: 18px;
+  filter: drop-shadow(0 14px 22px rgba(11, 31, 58, 0.25));
+  -webkit-user-drag: none;
+}
+
+.character-avatar__glow {
+  position: absolute;
+  inset: 8% 10% auto 10%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.22), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* Idle: a slow, gentle float — always running so the character never looks frozen. */
+@keyframes char-idle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(-0.6deg); }
+}
+
+/* Speaking: a subtle rhythmic pulse plus a glow behind the face, and small
+   "sound wave" arcs beside the portrait. */
+.character-avatar.is-speaking .character-avatar__tilt {
+  animation: char-talk 0.6s ease-in-out infinite;
+}
+.character-avatar.is-speaking .character-avatar__glow { opacity: 1; }
+@keyframes char-talk {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.015) translateY(-2px); }
+}
+
+.character-avatar__waves {
+  position: absolute;
+  right: -6%;
+  top: 30%;
+  width: 22%;
+  height: 40%;
+  pointer-events: none;
+}
+.character-avatar__waves span {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent-2, #14b8a6);
+  border-radius: 50%;
+  opacity: 0;
+  animation: char-wave 1.8s ease-out infinite;
+}
+.character-avatar__waves span:nth-child(2) { animation-delay: 0.5s; }
+.character-avatar__waves span:nth-child(3) { animation-delay: 1s; }
+@keyframes char-wave {
+  0% { transform: scale(0.4); opacity: 0.55; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Listening: a slight forward lean, as if paying closer attention. */
+.character-avatar.is-listening .character-avatar__tilt {
+  animation: char-listen 2.2s ease-in-out infinite;
+}
+@keyframes char-listen {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.01); }
+}
+
+/* Thinking: a slow head-tilt sway. */
+.character-avatar.is-thinking .character-avatar__tilt {
+  animation: char-think 2.6s ease-in-out infinite;
+}
+@keyframes char-think {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(2.2deg) translateY(-3px); }
+}
+
+/* Waving / greeting: a livelier bounce for the hello moment. */
+.character-avatar.is-waving .character-avatar__tilt {
+  animation: char-wave-bounce 0.9s ease-in-out 2;
+}
+@keyframes char-wave-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(-2deg); }
+  50% { transform: translateY(0) rotate(2deg); }
+  75% { transform: translateY(-6px) rotate(-1deg); }
+}
+
+/* Happy / excited: a brighter little hop. */
+.character-avatar.is-happy .character-avatar__tilt,
+.character-avatar.is-excited .character-avatar__tilt {
+  animation: char-hop 0.7s ease-in-out infinite;
+}
+@keyframes char-hop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-avatar__tilt { animation: none !important; transform: none !important; }
+}
