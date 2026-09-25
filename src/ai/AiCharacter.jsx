@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNarration } from '../avatar/useNarration.js';
 import { scrollToId } from '../animations/useSmoothScroll.js';
@@ -8,9 +8,9 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
-import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
-import KidAvatar from './components/KidAvatar.jsx';
+import { characterState } from '../avatar/character/config.js';
 import './aurrum-ai-character.css';
+const CharacterCanvas = lazy(() => import('../avatar/character/CharacterCanvas.jsx'));
 
 const webglOK = (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -39,7 +39,7 @@ function useIsCompact() {
  * once the visitor asks something it answers, draws the matching doodle
  * object, and softly highlights the related existing section.
  */
-export default function AiCharacter({ scene, overrideText, onOverrideConsumed, muted, onToggleMute, captionsOn, paused }) {
+export default function AiCharacter({ scene, overrideText, onOverrideConsumed, muted, onToggleMute, captionsOn, paused, reducedMotion }) {
   const ai = useAiCharacter({ muted });
   // Photoreal Anam cara-4 avatar: offered only when the token server is configured.
   const live = useLiveAvatar(ai, { muted });
@@ -49,13 +49,14 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const [showHistory, setShowHistory] = useState(false);
   const [avatar3d, setAvatar3d] = useState('loading'); // loading | ready | failed
   const inputRef = useRef(null);
+  const launcherRef = useRef(null);
   const logRef = useRef(null);
 
   // Scrolling to a new scene (after an answer has finished) returns the
   // character to narrating that scene; conversation history is kept.
   const [dismissedFor, setDismissedFor] = useState(null);
   useEffect(() => {
-    if (ai.status === 'idle' && ai.current) setDismissedFor(scene.id);
+    if (!expanded && ai.status === 'idle' && ai.current) setDismissedFor(scene.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene.id]);
   useEffect(() => { setDismissedFor(null); }, [ai.current]);
@@ -71,8 +72,8 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
     : narration.displayed;
   const speaking = showAnswer ? ai.speaking : narration.speaking;
   // Full sentence being spoken (the 3D lip-sync plans the whole line).
-  const lineText = showAnswer ? ai.current.answer : inConversation ? '' : scene.text;
   const state = inConversation ? ai.characterState : scene.state;
+  const character = characterState({ status: inConversation ? ai.status : 'idle', response: showAnswer ? ai.current : undefined, state, speaking: speaking && !paused });
 
   // VOICE → UNDERSTANDING → VISUAL RESPONSE: softly activate the related
   // existing section while it's being explained.
@@ -118,15 +119,30 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
 
   // Esc closes the mobile sheet.
   useEffect(() => {
-    if (!expanded) return;
-    const onKey = (e) => { if (e.key === 'Escape') setExpanded(false); };
+    if (!expanded || !compact) return;
+    inputRef.current?.focus();
+    const app = document.getElementById('root');
+    if (app) app.inert = true;
+    // The launcher is remounted when the portal closes; read its new ref.
+    const restoreFocus = () => launcherRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === 'Escape') setExpanded(false);
+      if (e.key === 'Tab') {
+        const items = [...document.querySelectorAll('.aurrum-ai-character--sheet button:not(:disabled), .aurrum-ai-character--sheet input')];
+        const first = items[0], last = items.at(-1);
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
     window.addEventListener('keydown', onKey);
     document.documentElement.classList.add('aurrum-ai-character-lock');
     return () => {
       window.removeEventListener('keydown', onKey);
       document.documentElement.classList.remove('aurrum-ai-character-lock');
+      if (app) app.inert = false;
+      restoreFocus();
     };
-  }, [expanded]);
+  }, [expanded, compact]);
 
   const submit = (e) => {
     e.preventDefault();
@@ -148,7 +164,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   // Desktop: full body, as the primary visual of the panel. Mobile chat
   // sheet: half body ('mid') — full body would be mostly empty space in a
   // narrow phone-width column, and would risk cropping into the composer.
-  const figure = (size) => (
+  const figure = () => (
     <div className={`aurrum-ai-character__stage aurrum-ai-character__stage--${ai.status}`}>
       <div className={`aurrum-ai-character__avatar ${webglOK && avatar3d !== 'failed' ? 'is-3d' : ''} ${avatar3d === 'ready' ? 'is-ready' : ''} ${live.isLive ? 'is-live' : ''}`}>
         {/* Photoreal live Elena (Anam cara-4 WebRTC stream). */}
@@ -162,16 +178,18 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           />
         )}
         {!live.isLive && webglOK && avatar3d !== 'failed' && (
-          <KidAvatar
-            state={state}
-            speaking={speaking && !paused}
+          <Suspense fallback={<span role="status">Preparing Elena…</span>}><CharacterCanvas
+            character={character}
+            halfBody={compact}
+            reducedMotion={reducedMotion}
+            paused={paused}
             onReady={() => setAvatar3d('ready')}
             onError={(err) => { console.warn('[Elena 3D] falling back to illustration:', err); setAvatar3d('failed'); }}
-          />
+          /></Suspense>
         )}
-        {!live.isLive && (!webglOK || avatar3d !== 'ready') && (
+        {!live.isLive && (!webglOK || avatar3d === 'failed') && (
           <div className="aurrum-ai-character__fallback">
-            <DoodleCompanion state={state} speaking={speaking && !paused} size={size} text={lineText} />
+            <span role="status">3D preview unavailable. Elena is still available in chat.</span>
           </div>
         )}
         <svg className="aurrum-ai-character__accent" viewBox="0 0 60 30" aria-hidden="true">
@@ -187,7 +205,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
 
   const full = (
     <>
-      {figure(compact ? 150 : 190)}
+      {figure()}
 
       {captionsOn && (
         <p className="aurrum-ai-character__caption" aria-live="polite">
@@ -310,15 +328,17 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             position:fixed descendants. Left in place, the launcher was
             anchoring to that top bar instead of the viewport, so "bottom"
             landed near the top of the screen instead of the actual bottom. */}
-        {createPortal(
+        {!expanded && createPortal(
           <button
+            ref={launcherRef}
             type="button"
             className="aurrum-ai-character__launcher"
             onClick={() => setExpanded(true)}
             aria-label="Talk to Elena, your Aurrum career advisor"
             aria-expanded={expanded}
           >
-            <DoodleCompanion state={state} speaking={speaking && !paused} size={40} />
+            <Suspense fallback={<span>Elena</span>}><CharacterCanvas character={character} halfBody reducedMotion={reducedMotion} paused={paused} /></Suspense>
+            <span className="aurrum-ai-character__launcher-label">Ask Elena</span>
             {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
           </button>,
           document.body
@@ -328,11 +348,11 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
             <div className="aurrum-ai-character__sheet-head">
               <div className="aurrum-ai-character__sheet-head-avatar">
-                <DoodleCompanion state={state} speaking={speaking && !paused} size={42} />
+                <span aria-hidden="true" className="character-monogram">E</span>
               </div>
               <div className="aurrum-ai-character__sheet-head-text">
                 <strong>Elena</strong>
-                <span>{ai.status === 'thinking' ? 'Thinking…' : ai.status === 'listening' ? 'Listening…' : 'Aurrum career advisor'}</span>
+                <span role="status">{ai.status === 'thinking' ? 'Thinking…' : ai.status === 'listening' ? 'Listening…' : 'Aurrum career advisor'}</span>
               </div>
               <button type="button" className="aurrum-ai-character__close" onClick={() => setExpanded(false)} aria-label="Close conversation">✕</button>
             </div>

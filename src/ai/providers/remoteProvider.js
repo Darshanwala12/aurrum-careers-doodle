@@ -1,4 +1,5 @@
 import { knowledge, FALLBACK } from '../knowledge.js';
+import { normalizeResponse } from '../../avatar/character/config.js';
 
 /**
  * Remote LLM provider — connects the character to a real model through YOUR
@@ -31,7 +32,9 @@ export function createRemoteProvider(endpoint, fallback) {
         if (!res.ok) throw new Error(`AI endpoint ${res.status}`);
         const data = await res.json();
         const entry = knowledge.find((k) => k.id === data.topic) ?? FALLBACK;
-        return { ...entry, id: data.topic ?? entry.id, answer: data.text || entry.answer };
+        return normalizeResponse({ ...entry, id: data.topic ?? entry.id,
+          answer: typeof data.message === 'string' ? data.message : typeof data.text === 'string' ? data.text : entry.answer,
+          emotion: data.emotion, animation: data.animation });
       } catch (err) {
         if (err.name === 'AbortError') throw err;
         // Network/backend failure: answer from approved content instead of going silent.

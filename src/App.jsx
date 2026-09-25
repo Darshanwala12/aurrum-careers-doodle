@@ -81,7 +81,7 @@ export default function App() {
 
       <div className={`story ${introDone ? 'is-visible' : 'is-hidden'}`} ref={trackRef}>
         <div className="story__avatar-col">
-          <CompanionStage
+          {introDone && <CompanionStage
             activeSceneId={activeSceneId}
             overrideText={overrideText}
             onOverrideConsumed={() => setOverrideText(null)}
@@ -89,7 +89,7 @@ export default function App() {
             captionsOn={captionsOn} onToggleCaptions={() => setCaptionsOn((c) => !c)}
             reducedMotion={reducedMotion} onToggleReducedMotion={() => setReducedMotion((r) => !r)}
             paused={paused} onTogglePaused={() => setPaused((p) => !p)}
-          />
+          />}
         </div>
 
         <div className="story__track">

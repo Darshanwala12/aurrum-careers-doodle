@@ -1,0 +1,41 @@
+{
+  "characters": [
+    {
+      "name": "Aria",
+      "file": "aria_ai_career_counsellor.glb",
+      "hair": "ponytail",
+      "outfit": "navy trouser suit"
+    },
+    {
+      "name": "Elena",
+      "file": "elena_ai_career_counsellor.glb",
+      "hair": "bob",
+      "outfit": "navy skirt suit"
+    },
+    {
+      "name": "Priya",
+      "file": "priya_ai_career_counsellor.glb",
+      "hair": "bun",
+      "outfit": "navy trouser suit"
+    },
+    {
+      "name": "Sophie",
+      "file": "sophie_ai_career_counsellor.glb",
+      "hair": "bun",
+      "outfit": "navy skirt suit"
+    }
+  ],
+  "states": [
+    "idle",
+    "thinking",
+    "talking",
+    "greeting",
+    "explaining",
+    "pointing",
+    "encouraging",
+    "happy",
+    "surprised",
+    "success"
+  ],
+  "recommendedFormat": "glb"
+}

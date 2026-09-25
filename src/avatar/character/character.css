@@ -1,0 +1,25 @@
+.character-canvas { position: relative; width: 100%; height: 100%; min-height: 0; }
+.character-canvas__surface { position: absolute; inset: 0; }
+.character-canvas canvas { display: block; width: 100%; height: 100%; }
+.intro-gate__figure .aurrum-ai-character__avatar { width: 260px; height: 320px; }
+.character-monogram { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #0b1f3a; color: white; }
+.character-canvas__fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; font: 500 .8rem/1.4 system-ui; color: var(--ink, #0b1f3a); background: radial-gradient(ellipse, #14b8a622, transparent 70%); }
+.aurrum-ai-character .aurrum-ai-character__avatar.is-3d { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.aurrum-ai-character .aurrum-ai-character__stage { padding-top: 0; min-height: 150px; }
+.aurrum-ai-character .aurrum-ai-character__stage:has(.aurrum-ai-character__doodle) .aurrum-ai-character__avatar { transform: none; }
+.aurrum-ai-character__doodle { max-width: 90px; opacity: .85; }
+button.aurrum-ai-character__launcher { width: 100px; height: 130px; border-radius: 24px; overflow: hidden; touch-action: manipulation; }
+.aurrum-ai-character__launcher-label { position: absolute; bottom: 5px; left: 0; right: 0; font-size: 11px; color: var(--ink); }
+.aurrum-ai-character--sheet .aurrum-ai-character__avatar { max-height: none; }
+.aurrum-ai-character--sheet .aurrum-ai-character__thought { display: none; }
+.aurrum-ai-character.aurrum-ai-character--sheet .aurrum-ai-character__stage { min-height: 100px; max-height: 260px; }
+@media (min-width: 900px) {
+  .story__avatar-col { position: fixed; left: max(0px, calc((100vw - 1800px) / 2)); top: var(--header-h); width: min(50vw, 900px); z-index: 10; }
+  .story__track { grid-column: 2; }
+}
+@media (max-width: 899px) { .story__track { padding-bottom: 155px; } }
+@media (max-height: 620px) {
+  .aurrum-ai-character--sheet { overflow-y: auto; }
+  .aurrum-ai-character.aurrum-ai-character--sheet .aurrum-ai-character__stage { flex: 0 0 100px; }
+  button.aurrum-ai-character__launcher { width: 76px; height: 100px; }
+}

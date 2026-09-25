@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { STATES } from '../data/states.js';
 import { createLocalProvider } from './providers/localProvider.js';
 import { createRemoteProvider } from './providers/remoteProvider.js';
-import { createBrowserVoice } from './voiceAdapter.js';
+import { createVoice } from './voiceAdapter.js';
+import { normalizeResponse } from '../avatar/character/config.js';
 
 /**
  * The AI character's brain: conversation history, the visible state machine
@@ -21,7 +22,7 @@ export function useAiCharacter({ muted = false, voice: voiceOverride } = {}) {
     const endpoint = import.meta.env.VITE_AURRUM_AI_ENDPOINT;
     return endpoint ? createRemoteProvider(endpoint, local) : local;
   }, []);
-  const voice = useMemo(() => voiceOverride ?? createBrowserVoice(), [voiceOverride]);
+  const voice = useMemo(() => voiceOverride ?? createVoice(), [voiceOverride]);
 
   const [status, setStatus] = useState('idle'); // idle | listening | thinking | speaking | error
   const [history, setHistory] = useState([]);    // [{role, text, topic?}]
@@ -60,7 +61,8 @@ export function useAiCharacter({ muted = false, voice: voiceOverride } = {}) {
   // Speak an entry. Captions follow the real TTS word boundaries when
   // available; when muted (or TTS gives no boundaries) a word timer drives
   // captions and lip movement instead so the character still "talks".
-  const deliver = useCallback((entry) => {
+  const deliver = useCallback((rawEntry) => {
+    const entry = normalizeResponse(rawEntry);
     const text = entry.answer;
     const token = ++tokenRef.current;
     const live = () => token === tokenRef.current;
@@ -76,7 +78,7 @@ export function useAiCharacter({ muted = false, voice: voiceOverride } = {}) {
         i += 1;
         setSpoken(words.slice(0, i).join(' '));
         if (i < words.length) wordTimerRef.current = setTimeout(tick, 170);
-        else setStatus('idle');
+        else if (mutedRef.current || !voice.supported) setStatus('idle');
       };
       wordTimerRef.current = setTimeout(tick, 120);
     };
@@ -118,11 +120,12 @@ export function useAiCharacter({ muted = false, voice: voiceOverride } = {}) {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const [entry] = await Promise.all([
+      const [rawEntry] = await Promise.all([
         provider.respond({ text, history: priorHistory, signal: controller.signal }),
         new Promise((r) => setTimeout(r, MIN_THINK_MS)),
       ]);
       if (controller.signal.aborted) return;
+      const entry = normalizeResponse(rawEntry);
       setHistory((h) => [...h, { role: 'assistant', text: entry.answer, topic: entry.id }]);
       deliver(entry);
     } catch (err) {

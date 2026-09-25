@@ -1,0 +1,10 @@
+.character-lab { min-height: 100vh; padding: 32px; background: #edf3f5; color: #0b1f3a; font: 15px/1.5 system-ui; }
+.character-lab h1 { font: 600 42px/1.1 system-ui; margin: 12px 0; }
+.character-lab__controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 24px 0; }
+.character-lab__controls select, .character-lab button { padding: 8px; border: 1px solid #174a7e55; border-radius: 8px; background: white; color: #0b1f3a; }
+.character-lab__views { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.character-lab figure { margin: 0; padding: 16px; border: 1px solid #174a7e22; border-radius: 24px; background: radial-gradient(ellipse at 50% 40%, white, #dce9ee); }
+.character-lab figure > div { height: 460px; }
+.character-lab figcaption { text-align: center; font-weight: 600; }
+@media(max-width: 800px) { .character-lab__views { grid-template-columns: repeat(2, 1fr); } .character-lab figure > div { height: 300px; } }
+@media(max-width: 420px) { .character-lab { padding: 16px; } .character-lab__views { grid-template-columns: 1fr; } }

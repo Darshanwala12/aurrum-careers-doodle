@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 import AccessibilityBar from './AccessibilityBar.jsx';
 import { scrollToId } from '../animations/useSmoothScroll.js';
 import { scenes, navScenes } from '../data/scenes.js';
@@ -25,7 +24,7 @@ export default function CompanionStage({
         fallback={
           <div className="companion-stage__row">
             <div className="companion-stage__figure">
-              <DoodleCompanion state={scene.state} size={190} />
+              <span role="status">Preparing Elena…</span>
             </div>
           </div>
         }
@@ -36,6 +35,7 @@ export default function CompanionStage({
           muted={muted} onToggleMute={onToggleMute}
           captionsOn={captionsOn}
           paused={paused}
+          reducedMotion={reducedMotion}
         />
       </Suspense>
 

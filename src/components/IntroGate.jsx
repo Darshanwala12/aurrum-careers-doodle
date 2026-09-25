@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useNarration } from '../avatar/useNarration.js';
 import { personas } from '../data/scenes.js';
-import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
-import KidAvatar from '../ai/components/KidAvatar.jsx';
+const CharacterCanvas = lazy(() => import('../avatar/character/CharacterCanvas.jsx'));
 
 const webglOK = (() => {
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -62,16 +61,16 @@ export default function IntroGate({ onDone }) {
       <div className="intro-gate__figure">
         {webglOK && avatar3d !== 'failed' && (
           <div className={`aurrum-ai-character__avatar is-3d ${avatar3d === 'ready' ? 'is-ready' : ''}`}>
-            <KidAvatar
-              state="greeting"
-              speaking={speaking}
+            <Suspense fallback={<span>Preparing Elena…</span>}><CharacterCanvas
+              character={{ emotion: 'happy', animation: 'greeting' }}
+              reducedMotion={window.matchMedia('(prefers-reduced-motion: reduce)').matches}
               onReady={() => setAvatar3d('ready')}
               onError={() => setAvatar3d('failed')}
-            />
+            /></Suspense>
           </div>
         )}
-        {(!webglOK || avatar3d !== 'ready') && (
-          <DoodleCompanion state="greeting" speaking={speaking} size={200} text={displayed} />
+        {(!webglOK || avatar3d === 'failed') && (
+          <span>Meet Elena, your career counsellor</span>
         )}
       </div>
       <p className="intro-gate__caption" aria-live="polite">{displayed}</p>

@@ -1,91 +1,88 @@
-/**
- * Voice/avatar adapter seam.
- *
- * The character's mouth, expressions and gestures are driven by three events:
- * onStart, onBoundary (each spoken word) and onEnd. The default adapter below
- * uses the browser's built-in speech synthesis, which needs no credentials.
- *
- * To use a hosted real-time avatar/voice vendor (HeyGen LiveAvatar, Tavus,
- * Synthesia Interactive, bitHuman, …), write an adapter with the same shape
- * using that vendor's official SDK and pass it to useAiCharacter({ voice }).
- * Nothing else in the UI needs to change.
- *
- *   speak(text, { onStart, onBoundary, onEnd }) -> void
- *   stop() -> void
- */
-/**
- * Live speech events for anything that animates to the voice (the 3D
- * avatar's lip-sync): 'start' {text}, 'boundary' {text, charIndex}, 'end'.
- */
+import { VISEMES } from '../avatar/character/config.js';
 export const speechEvents = new EventTarget();
-const emit = (type, detail) => speechEvents.dispatchEvent(new CustomEvent(type, { detail }));
-
+let activeSpeech = null, owner = null, activeStop = null;
+export const getActiveSpeech = () => activeSpeech;
+const emit = (type, detail = {}) => {
+  if (type === 'start') activeSpeech = detail;
+  if (type === 'end') activeSpeech = null;
+  speechEvents.dispatchEvent(new CustomEvent(type, { detail }));
+};
 export function createBrowserVoice() {
   const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-  let voice = null;
-
-  // Elena is a woman: prefer known female voices (Windows, Edge neural,
-  // Chrome, macOS/iOS names), UK English first, and never fall back to a
-  // voice known to be male.
-  const FEMALE = /female|woman|libby|sonia|maisie|hazel|susan|mia|kate|serena|stephanie|fiona|moira|tessa|karen|samantha|victoria|zira|aria|jenny|michelle|emma|ava|allison|natasha|clara|catherine|google uk english female|google us english/i;
-  const MALE = /\bmale\b|george|ryan|thomas|oliver|guy|david|mark|james|daniel|fred|alex|arthur|christopher|eric|roger|steffan|william|google uk english male/i;
-  const pickVoice = () => {
-    const voices = (synth?.getVoices() ?? []).filter((v) => /^en/i.test(v.lang));
-    const female = voices.filter((v) => FEMALE.test(v.name) && !/\bmale\b/i.test(v.name.replace(/female/i, '')));
-    const notMale = voices.filter((v) => !MALE.test(v.name.replace(/female/i, '')));
-    const rank = (list) =>
-      list.find((v) => /en-GB/i.test(v.lang) && /natural|online|neural/i.test(v.name)) ??
-      list.find((v) => /en-GB/i.test(v.lang)) ??
-      list.find((v) => /natural|online|neural/i.test(v.name)) ??
-      list[0];
-    voice = rank(female) ?? rank(notMale) ?? null;
+  const id = {}; let generation = 0, utterance = null;
+  const stop = () => {
+    generation++;
+    if (owner === id) { owner = null; activeStop = null; synth?.cancel(); emit('end'); }
+    utterance = null;
   };
-  if (synth) {
-    pickVoice();
-    synth.addEventListener?.('voiceschanged', pickVoice);
-  }
-
-  const trySpeak = (text, cbs) => {
-    const { onStart, onBoundary, onEnd } = cbs;
-    synth.cancel();
-    if (!voice) pickVoice(); // voices can load after the first call
-    const u = new SpeechSynthesisUtterance(text);
-    if (voice) u.voice = voice;
-    u.lang = voice?.lang ?? 'en-GB';
-    u.rate = 1;
-    // No female voice installed at all: raise the pitch so the default
-    // voice at least doesn't sound like a man.
-    u.pitch = voice && FEMALE.test(voice.name) ? 1.05 : 1.35;
-    let started = false;
-    u.onstart = () => { started = true; emit('start', { text }); onStart?.(); };
-    u.onboundary = (e) => {
-      if (e.name !== 'word' && e.name !== undefined) return;
-      emit('boundary', { text, charIndex: e.charIndex });
-      onBoundary?.(e.charIndex);
-    };
-    u.onend = () => { emit('end', { text }); onEnd?.(); };
-    u.onerror = (e) => {
-      // Some browsers (notably page-load-time calls, before any user
-      // gesture) silently refuse the very first utterance ('not-allowed' /
-      // 'interrupted') instead of firing onstart. Retry once on the visitor's
-      // first tap/click/key anywhere on the page, so the intro greeting is
-      // never permanently lost to that autoplay restriction.
-      if (!started && e.error !== 'canceled' && e.error !== 'interrupted') {
-        const retry = () => trySpeak(text, cbs);
-        document.addEventListener('pointerdown', retry, { once: true });
-        document.addEventListener('keydown', retry, { once: true });
-      }
-      emit('end', { text }); onEnd?.();
-    };
-    synth.speak(u);
-  };
-
   return {
-    supported: Boolean(synth),
+    supported: Boolean(synth), stop,
     speak(text, { onStart, onBoundary, onEnd } = {}) {
-      if (!synth) { onEnd?.(); return; }
-      trySpeak(text, { onStart, onBoundary, onEnd });
+      stop(); if (!synth) { onEnd?.(); return; }
+      activeStop?.(); synth.cancel(); emit('end'); owner = id; activeStop = stop;
+      const token = generation, live = () => generation === token && owner === id;
+      const voices = synth.getVoices().filter(v => /^en/i.test(v.lang));
+      const female = /female|libby|sonia|hazel|susan|kate|serena|fiona|moira|karen|samantha|zira|aria|jenny|emma|google uk english female/i;
+      const preferred = voices.filter(v => female.test(v.name));
+      const voice = preferred.find(v => /en-GB/i.test(v.lang)) ?? preferred[0];
+      const u = new SpeechSynthesisUtterance(text); utterance = u;
+      if (voice) u.voice = voice;
+      u.lang = voice?.lang ?? 'en-GB'; u.rate = 1; u.pitch = 1.05;
+      u.onstart = () => { if (live()) { emit('start', { text }); onStart?.(); } };
+      u.onboundary = e => {
+        if (live() && (!e.name || e.name === 'word')) { emit('boundary', { text, charIndex: e.charIndex }); onBoundary?.(e.charIndex); }
+      };
+      const finish = () => {
+        if (!live()) return;
+        owner = null; activeStop = null; utterance = null; emit('end'); onEnd?.();
+      };
+      u.onend = finish; u.onerror = finish;
+      synth.speak(utterance);
     },
-    stop() { synth?.cancel(); emit('end', {}); },
   };
+}
+/** POST {text} -> {audioUrl, visemes:[{start,end,value}], words:[{start,charIndex}]}
+ * Times are seconds on the audio clock. No client-side credentials.
+ */
+export function createAudioVoice(endpoint, fallback = createBrowserVoice()) {
+  const id = {};
+  let generation = 0, abort, audio, frame;
+  const stop = () => {
+    generation++; abort?.abort(); cancelAnimationFrame(frame);
+    if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); audio = null; }
+    if (owner === id) { owner = null; activeStop = null; emit('end'); }
+    fallback.stop();
+  };
+  return {
+    supported: true, stop,
+    async speak(text, callbacks = {}) {
+      stop(); activeStop?.(); owner = id; activeStop = stop;
+      const token = generation; abort = new AbortController();
+      const live = () => token === generation;
+      try {
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }), signal: abort.signal });
+        if (!response.ok) throw new Error('TTS unavailable');
+        const data = await response.json(); if (!live()) return;
+        if (typeof data.audioUrl !== 'string') throw new Error('Missing audio URL');
+        const url = new URL(data.audioUrl, window.location.href);
+        if (url.origin !== window.location.origin || !['http:', 'https:'].includes(url.protocol)) throw new Error('TTS audio must be same-origin');
+        const visemes = (Array.isArray(data.visemes) ? data.visemes : []).filter(v => VISEMES.includes(v.value) && Number.isFinite(v.start) && Number.isFinite(v.end) && v.start >= 0 && v.end > v.start).sort((a, b) => a.start - b.start);
+        if (!visemes.length) throw new Error('TTS requires viseme timings');
+        const words = (Array.isArray(data.words) ? data.words : []).filter(w => Number.isFinite(w.start) && Number.isInteger(w.charIndex) && w.charIndex >= 0 && w.charIndex < text.length).sort((a, b) => a.start - b.start);
+        audio = new Audio(url.href); const current = audio; let word = 0, started = false, finished = false;
+        const finish = () => { if (live() && !finished) { finished = true; cancelAnimationFrame(frame); if (owner === id) { owner = null; activeStop = null; emit('end'); } callbacks.onEnd?.(); } };
+        current.onended = finish; current.onerror = finish;
+        current.onplaying = () => { if (live() && !started) { started = true; emit('start', { text, audio: current, visemes }); callbacks.onStart?.(); } };
+        await current.play(); if (!live()) { current.pause(); return; }
+        const tick = () => {
+          if (!live() || current.ended || finished) return;
+          while (word < words.length && current.currentTime >= words[word].start) callbacks.onBoundary?.(words[word++].charIndex);
+          frame = requestAnimationFrame(tick);
+        }; tick();
+      } catch (error) { if (live() && error.name !== 'AbortError') { audio?.pause(); audio = null; fallback.speak(text, callbacks); } }
+    },
+  };
+}
+export function createVoice() {
+  return import.meta.env.VITE_AURRUM_TTS_ENDPOINT ? createAudioVoice(import.meta.env.VITE_AURRUM_TTS_ENDPOINT) : createBrowserVoice();
 }

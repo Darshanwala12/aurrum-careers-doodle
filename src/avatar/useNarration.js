@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createBrowserVoice } from '../ai/voiceAdapter.js';
+import { createVoice } from '../ai/voiceAdapter.js';
 
 // Reveals a caption progressively while `speaking` is true, driving the
 // character's talk-cycle (DoodleCompanion's mouth/gesture animation) AND —
@@ -12,7 +12,7 @@ export function useNarration(text, { muted = false } = {}) {
   const [speaking, setSpeaking] = useState(false);
   const timerRef = useRef(null);
   const voiceRef = useRef(null);
-  if (!voiceRef.current) voiceRef.current = createBrowserVoice();
+  if (!voiceRef.current) voiceRef.current = createVoice();
 
   useEffect(() => {
     const voice = voiceRef.current;
