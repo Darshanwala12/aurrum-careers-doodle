@@ -26,8 +26,9 @@
   --paper-3: #b3ad98;
   --ink: #010101;
   --muted: #5f5d5b;
-  --accent: #dd5730;
-  --accent-2: #dd5730;
+  --accent: #bd2b28;
+  --accent-2: #cd9229;
+  --accent-rgb: 189, 43, 40;
   --line: rgba(1, 1, 1, 0.12);
   --font-display: 'Coolvetica Condensed', 'Coolvetica', sans-serif;
   --font-body: 'Coolvetica', sans-serif;
@@ -45,8 +46,9 @@
   --paper-3: #303234;
   --ink: #f4f1ee;
   --muted: #a4a19d;
-  --accent: #e6693f;
-  --accent-2: #e6693f;
+  --accent: #d33a35;
+  --accent-2: #cd9229;
+  --accent-rgb: 211, 58, 53;
   --line: rgba(244, 241, 238, 0.12);
   --paper-rgb: 28, 30, 32;
   color-scheme: dark;
@@ -294,7 +296,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
   flex-shrink: 0; background: none; border: none; padding: 0.15rem 0.3rem; cursor: pointer; font-family: inherit;
 }
 .journey-nav__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.journey-nav__item.is-active { background: rgba(221, 87, 48, 0.08); }
+.journey-nav__item.is-active { background: rgba(var(--accent-rgb), 0.08); }
 @media (max-width: 899px) {
   .journey-nav__item { width: auto; gap: 0.25rem; padding: 0.15rem 0.2rem; font-size: 0.7rem; }
 }
@@ -306,7 +308,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
 .journey-nav__item.is-active { opacity: 1; color: var(--ink); font-weight: 600; }
 .journey-nav__index { font-family: var(--font-display); color: inherit; }
 .journey-nav__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background-color 0.3s var(--ease); }
-.journey-nav__item.is-active .journey-nav__dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(221, 87, 48, 0.18); }
+.journey-nav__item.is-active .journey-nav__dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18); }
 
 /* Question chips (§20) */
 .question-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 360px; }
@@ -342,7 +344,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
   font-size: 0.7rem; color: var(--muted); cursor: pointer; transition: all 0.3s var(--ease);
 }
 .a11y-btn:hover { border-color: var(--accent); color: var(--accent); }
-.a11y-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: rgba(221, 87, 48, 0.08); }
+.a11y-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
 
 /* Story track / scene panels */
 .story__track { position: relative; }
