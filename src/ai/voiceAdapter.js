@@ -45,28 +45,46 @@ export function createBrowserVoice() {
     synth.addEventListener?.('voiceschanged', pickVoice);
   }
 
+  const trySpeak = (text, cbs) => {
+    const { onStart, onBoundary, onEnd } = cbs;
+    synth.cancel();
+    if (!voice) pickVoice(); // voices can load after the first call
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice?.lang ?? 'en-GB';
+    u.rate = 1;
+    // No female voice installed at all: raise the pitch so the default
+    // voice at least doesn't sound like a man.
+    u.pitch = voice && FEMALE.test(voice.name) ? 1.05 : 1.35;
+    let started = false;
+    u.onstart = () => { started = true; emit('start', { text }); onStart?.(); };
+    u.onboundary = (e) => {
+      if (e.name !== 'word' && e.name !== undefined) return;
+      emit('boundary', { text, charIndex: e.charIndex });
+      onBoundary?.(e.charIndex);
+    };
+    u.onend = () => { emit('end', { text }); onEnd?.(); };
+    u.onerror = (e) => {
+      // Some browsers (notably page-load-time calls, before any user
+      // gesture) silently refuse the very first utterance ('not-allowed' /
+      // 'interrupted') instead of firing onstart. Retry once on the visitor's
+      // first tap/click/key anywhere on the page, so the intro greeting is
+      // never permanently lost to that autoplay restriction.
+      if (!started && e.error !== 'canceled' && e.error !== 'interrupted') {
+        const retry = () => trySpeak(text, cbs);
+        document.addEventListener('pointerdown', retry, { once: true });
+        document.addEventListener('keydown', retry, { once: true });
+      }
+      emit('end', { text }); onEnd?.();
+    };
+    synth.speak(u);
+  };
+
   return {
     supported: Boolean(synth),
     speak(text, { onStart, onBoundary, onEnd } = {}) {
       if (!synth) { onEnd?.(); return; }
-      synth.cancel();
-      if (!voice) pickVoice(); // voices can load after the first call
-      const u = new SpeechSynthesisUtterance(text);
-      if (voice) u.voice = voice;
-      u.lang = voice?.lang ?? 'en-GB';
-      u.rate = 1;
-      // No female voice installed at all: raise the pitch so the default
-      // voice at least doesn't sound like a man.
-      u.pitch = voice && FEMALE.test(voice.name) ? 1.05 : 1.35;
-      u.onstart = () => { emit('start', { text }); onStart?.(); };
-      u.onboundary = (e) => {
-        if (e.name !== 'word' && e.name !== undefined) return;
-        emit('boundary', { text, charIndex: e.charIndex });
-        onBoundary?.(e.charIndex);
-      };
-      u.onend = () => { emit('end', { text }); onEnd?.(); };
-      u.onerror = () => { emit('end', { text }); onEnd?.(); };
-      synth.speak(u);
+      trySpeak(text, { onStart, onBoundary, onEnd });
     },
     stop() { synth?.cancel(); emit('end', {}); },
   };

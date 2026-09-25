@@ -57,7 +57,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const showAnswer = Boolean(ai.current) && dismissedFor !== scene.id && !pending;
   const inConversation = showAnswer || pending;
   // In a live session the real avatar does all the talking — no scripted narration.
-  const narration = useNarration(!inConversation && !paused && !live.isLive ? scene.text : '');
+  const narration = useNarration(!inConversation && !paused && !live.isLive ? scene.text : '', { muted });
 
   const caption = showAnswer ? ai.spoken : pending ? ''
     : live.isLive ? 'Elena is listening — just start talking, or type a question below.'

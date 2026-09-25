@@ -34,11 +34,17 @@ export default function IntroGate({ onDone }) {
     return () => ctx.revert();
   }, []);
 
+  // Advance once line 1 has actually finished being spoken (real TTS paces
+  // slower/faster than a fixed word-count timer ever could), with a timeout
+  // fallback in case speech is blocked/unsupported and never starts.
+  const spokeLine1 = useRef(false);
   useEffect(() => {
     if (line !== 1) return;
-    const t = setTimeout(() => setLine(2), Math.max(2200, LINE_1.split(' ').length * 150 + 900));
+    if (speaking) spokeLine1.current = true;
+    if (spokeLine1.current && !speaking) { setLine(2); return; }
+    const t = setTimeout(() => setLine(2), 4000);
     return () => clearTimeout(t);
-  }, [line]);
+  }, [line, speaking]);
 
   return (
     <div className="intro-gate" ref={rootRef}>
