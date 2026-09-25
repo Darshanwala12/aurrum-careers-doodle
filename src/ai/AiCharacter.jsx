@@ -8,7 +8,7 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
-import CharacterAvatar from '../avatar/CharacterAvatar.jsx';
+import DoodleCompanion from '../avatar/DoodleCompanion.jsx';
 import './aurrum-ai-character.css';
 
 const HIGHLIGHT_CLASS = 'aurrum-ai-character-highlight';
@@ -156,7 +156,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
         )}
         {!live.isLive && (
           <div className="aurrum-ai-character__fallback">
-            <CharacterAvatar state={state} speaking={speaking && !paused} size={size} />
+            <DoodleCompanion state={state} speaking={speaking && !paused} size={size} text={lineText} />
           </div>
         )}
         <svg className="aurrum-ai-character__accent" viewBox="0 0 60 30" aria-hidden="true">
@@ -303,7 +303,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             aria-label="Talk to Elena, your Aurrum career advisor"
             aria-expanded={expanded}
           >
-            <CharacterAvatar state={state} speaking={speaking && !paused} size={40} />
+            <DoodleCompanion state={state} speaking={speaking && !paused} size={40} />
             {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
           </button>,
           document.body
@@ -313,7 +313,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
             <div className="aurrum-ai-character__sheet-head">
               <div className="aurrum-ai-character__sheet-head-avatar">
-                <CharacterAvatar state={state} speaking={speaking && !paused} size={42} />
+                <DoodleCompanion state={state} speaking={speaking && !paused} size={42} />
               </div>
               <div className="aurrum-ai-character__sheet-head-text">
                 <strong>Elena</strong>
