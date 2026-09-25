@@ -20,6 +20,26 @@ const CANDIDATES = [
     url: '/avatars/demo/candidate-3-xbot.glb',
     note: 'Gender-neutral "Beta" character, Mixamo-rigged, with idle/walk/run/agree/headShake/sad_pose/sneak_pose clips — the best animation variety of the three, but a generic game-character look, not a professional female career advisor, and still no facial morph targets for lip-sync.',
   },
+  {
+    label: 'Candidate 4 — Aria (career-counsellor pack)',
+    url: '/avatars/career-pack/aria_ai_career_counsellor.glb',
+    note: 'Purpose-built: navy trouser suit, ponytail. Materials literally named Deep Navy/Professional Blue/Ivory White/Teal Accent/Gold — matches the brand palette by name. Clips exactly match the requested state vocabulary (idle/thinking/talking/greeting/explaining/pointing/encouraging/happy/surprised/success). Not a skinned mesh (separate rigid node parts, no bone weights) and no facial morph targets, but by far the closest brand fit of any candidate so far.',
+  },
+  {
+    label: 'Candidate 5 — Elena (career-counsellor pack)',
+    url: '/avatars/career-pack/elena_ai_career_counsellor.glb',
+    note: 'Same construction as Aria — bob hairstyle, navy skirt suit. Same 10 brand-matched materials and exact state-named clips.',
+  },
+  {
+    label: 'Candidate 6 — Priya (career-counsellor pack)',
+    url: '/avatars/career-pack/priya_ai_career_counsellor.glb',
+    note: 'Same construction — bun hairstyle, navy trouser suit.',
+  },
+  {
+    label: 'Candidate 7 — Sophie (career-counsellor pack)',
+    url: '/avatars/career-pack/sophie_ai_career_counsellor.glb',
+    note: 'Same construction — bun hairstyle, navy skirt suit.',
+  },
 ];
 
 export default function CharacterDemoPage() {

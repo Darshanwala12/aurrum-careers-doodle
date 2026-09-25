@@ -3,6 +3,12 @@ import gsap from 'gsap';
 import { useNarration } from '../avatar/useNarration.js';
 import { personas } from '../data/scenes.js';
 import DoodleCompanion from '../avatar/CareerCounsellorAvatar.jsx';
+import MichelleAvatar from '../ai/components/MichelleAvatar.jsx';
+
+const webglOK = (() => {
+  try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); }
+  catch { return false; }
+})();
 
 const LINE_1 = "Hi. I'm Elena.";
 const LINE_2 = "Tell me where you are in your career, and I'll show you where we can help.";
@@ -38,6 +44,7 @@ export default function IntroGate({ onDone }) {
   // slower/faster than a fixed word-count timer ever could), with a timeout
   // fallback in case speech is blocked/unsupported and never starts.
   const spokeLine1 = useRef(false);
+  const [avatar3d, setAvatar3d] = useState('loading');
   useEffect(() => {
     if (line !== 1) return;
     if (speaking) spokeLine1.current = true;
@@ -53,7 +60,19 @@ export default function IntroGate({ onDone }) {
           <img src="/brand/aurrum-logo-dark.webp" alt="Aurrum Careers" className="logo-chip__img logo-chip__img--dark" />
       </div>
       <div className="intro-gate__figure">
-        <DoodleCompanion state="greeting" speaking={speaking} size={200} text={displayed} />
+        {webglOK && avatar3d !== 'failed' && (
+          <div className={`aurrum-ai-character__avatar is-3d ${avatar3d === 'ready' ? 'is-ready' : ''}`}>
+            <MichelleAvatar
+              state="greeting"
+              speaking={speaking}
+              onReady={() => setAvatar3d('ready')}
+              onError={() => setAvatar3d('failed')}
+            />
+          </div>
+        )}
+        {(!webglOK || avatar3d !== 'ready') && (
+          <DoodleCompanion state="greeting" speaking={speaking} size={200} text={displayed} />
+        )}
       </div>
       <p className="intro-gate__caption" aria-live="polite">{displayed}</p>
 
