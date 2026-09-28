@@ -8,6 +8,8 @@ import { SUGGESTED_PROMPTS, OPENING_LINE, knowledge } from './knowledge.js';
 import { personas } from '../data/scenes.js';
 import DoodleWorld from './components/DoodleWorld.jsx';
 import ThoughtDoodles from './components/ThoughtDoodles.jsx';
+import VoiceControlPanel from './VoiceControlPanel.jsx';
+import { getVoiceSettings } from './voiceAdapter.js';
 import { characterState } from '../avatar/character/config.js';
 import './aurrum-ai-character.css';
 const CharacterCanvas = lazy(() => import('../avatar/character/CharacterCanvas.jsx'));
@@ -47,6 +49,8 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const [expanded, setExpanded] = useState(false);
   const [draft, setDraft] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState(getVoiceSettings);
   const [avatar3d, setAvatar3d] = useState('loading'); // loading | ready | failed
   const inputRef = useRef(null);
   const launcherRef = useRef(null);
@@ -68,7 +72,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
   const narration = useNarration(!inConversation && !paused && !live.isLive ? scene.text : '', { muted });
 
   const caption = showAnswer ? ai.spoken : pending ? ''
-    : live.isLive ? 'Elena is listening — just start talking, or type a question below.'
+    : live.isLive ? 'Elena is listening. Just start talking, or type a question below.'
     : narration.displayed;
   const speaking = showAnswer ? ai.speaking : narration.speaking;
   // Full sentence being spoken (the 3D lip-sync plans the whole line).
@@ -213,6 +217,7 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           {speaking && !paused && <span className="aurrum-ai-character__cursor" aria-hidden="true">▍</span>}
         </p>
       )}
+      {!showAnswer && !pending && voiceSettings.greetingName && <p className="aurrum-ai-character__greeting">Hello, {voiceSettings.greetingName}. I’m Zenz. Ready when you are.</p>}
 
       {live.status !== 'unavailable' && (
         <div className="aurrum-ai-character__live" role="group" aria-label="Live conversation">
@@ -270,6 +275,9 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           <button type="button" className="aurrum-ai-character__icon" onClick={ai.replay} disabled={!ai.current || busy || live.isLive} aria-label="Replay answer" title="Replay">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" /></svg>
           </button>
+          <button type="button" className="aurrum-ai-character__icon" onClick={() => setVoiceOpen((v) => !v)} aria-pressed={voiceOpen} aria-label="Zenz voice controls" title="Voice controls">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7v4M16 7v4M5 10v2M19 10v2M8 21h8" /></svg>
+          </button>
           <button
             type="button"
             className="aurrum-ai-character__icon"
@@ -283,6 +291,8 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
           </button>
         </div>
       </div>
+
+      {voiceOpen && <VoiceControlPanel onClose={() => setVoiceOpen(false)} onSettingsChange={setVoiceSettings} />}
 
       <div className="aurrum-ai-character__prompts" role="list" aria-label="Suggested questions">
         {section && (
@@ -334,24 +344,24 @@ export default function AiCharacter({ scene, overrideText, onOverrideConsumed, m
             type="button"
             className="aurrum-ai-character__launcher"
             onClick={() => setExpanded(true)}
-            aria-label="Talk to Elena, your Aurrum career advisor"
+            aria-label="Ask Zenz, your Aurrum career companion"
             aria-expanded={expanded}
           >
             <Suspense fallback={<span>Elena</span>}><CharacterCanvas character={character} halfBody reducedMotion={reducedMotion} paused={paused} /></Suspense>
-            <span className="aurrum-ai-character__launcher-label">Ask Elena</span>
+            <span className="aurrum-ai-character__launcher-label">Ask Zenz</span>
             {busy && <span className="aurrum-ai-character__launcher-dot" aria-hidden="true" />}
           </button>,
           document.body
         )}
 
         {expanded && createPortal(
-          <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Elena">
+          <div className="aurrum-ai-character aurrum-ai-character--sheet" role="dialog" aria-modal="true" aria-label="Conversation with Zenz">
             <div className="aurrum-ai-character__sheet-head">
               <div className="aurrum-ai-character__sheet-head-avatar">
                 <span aria-hidden="true" className="character-monogram">E</span>
               </div>
               <div className="aurrum-ai-character__sheet-head-text">
-                <strong>Elena</strong>
+                <strong>Zenz</strong>
                 <span role="status">{ai.status === 'thinking' ? 'Thinking…' : ai.status === 'listening' ? 'Listening…' : 'Aurrum career advisor'}</span>
               </div>
               <button type="button" className="aurrum-ai-character__close" onClick={() => setExpanded(false)} aria-label="Close conversation">✕</button>

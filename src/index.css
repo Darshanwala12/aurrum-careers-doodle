@@ -61,21 +61,16 @@ html, body { margin: 0; padding: 0; }
    scroll container and breaking `position: sticky` for every descendant.
    This was the actual cause of the avatar column not sticking. */
 html { overflow-x: clip; }
-/* Plastered-wall / handmade-paper background: fine fractal-noise grain
-   (feTurbulence, tiled) plus a couple of soft light/shadow blotches for
-   depth, over the flat --paper tone. Pure inline-SVG so it costs nothing
-   to load and scales cleanly at any resolution. Opacity kept low so it
-   reads as a physical surface texture, not a pattern competing with
-   body text. */
+/* The Aurrum solution paper texture is the unified surface across the site. */
 body {
   background:
     radial-gradient(ellipse 900px 700px at 12% 8%, rgba(255, 255, 255, 0.05), transparent 60%),
     radial-gradient(ellipse 800px 600px at 88% 90%, rgba(0, 0, 0, 0.03), transparent 55%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.16'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"),
-    var(--paper);
-  background-size: auto, auto, 300px 300px, auto;
-  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
-  background-attachment: fixed, fixed, local, local;
+    url('/brand/paper-kraft.jpg');
+  background-size: auto, auto, cover;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center;
+  background-attachment: fixed, fixed, fixed;
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.65;
@@ -85,13 +80,12 @@ body {
 }
 :root[data-theme="dark"] body {
   background:
-    radial-gradient(ellipse 900px 700px at 12% 8%, rgba(255, 255, 255, 0.018), transparent 60%),
-    radial-gradient(ellipse 800px 600px at 88% 90%, rgba(255, 255, 255, 0.016), transparent 55%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23f4f1ee' stroke-width='1.4' stroke-linecap='round' opacity='0.06'%3E%3Cpath d='M10 70 C 25 40, 55 40, 70 70 C 85 100, 115 100, 130 70'/%3E%3Cpath d='M70 70 C 66 58, 70 50, 78 46'/%3E%3Cpath d='M70 70 C 74 82, 70 90, 62 94'/%3E%3Ccircle cx='24' cy='55' r='2.2'/%3E%3Ccircle cx='116' cy='85' r='2.2'/%3E%3Cpath d='M10 0 C 25 -30, 55 -30, 70 0' transform='translate(0,140)'/%3E%3C/g%3E%3C/svg%3E"),
-    var(--paper);
-  background-size: auto, auto, 140px 140px, auto;
-  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
-  background-attachment: fixed, fixed, local, local;
+    linear-gradient(rgba(13, 19, 25, 0.72), rgba(13, 19, 25, 0.72)),
+    url('/brand/paper-kraft.jpg');
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-position: center;
+  background-attachment: fixed, fixed;
 }
 
 /* Radial wipe overlay used by ThemeToggle for the animated theme switch */
@@ -129,9 +123,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
 .intro-gate {
   position: fixed; inset: 0; z-index: 50;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
-  /* Transparent so the same body background (paper + folk motif) as the
-     inner page shows through; the story underneath is opacity:0 here. */
-  background: transparent;
+  background: linear-gradient(rgba(234, 215, 190, 0.58), rgba(234, 215, 190, 0.58)), url('/brand/paper-kraft.jpg') center / cover fixed;
   padding: 2rem;
   text-align: center;
 }
@@ -200,7 +192,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
 }
 
 /* Story layout */
-.companion-app { position: relative; }
+.companion-app { position: relative; min-height: 100vh; background: linear-gradient(rgba(234, 215, 190, 0.22), rgba(234, 215, 190, 0.22)), url('/brand/paper-kraft.jpg') center / cover fixed; }
 .story {
   position: relative; display: grid; grid-template-columns: 1fr;
   padding-top: calc(var(--header-h) + var(--avatarbar-h));
@@ -351,12 +343,17 @@ p { color: var(--muted); margin: 0 0 1rem; }
 .scene-panel {
   min-height: 70vh; display: flex; align-items: center; gap: 1.5rem;
   padding: 2.5rem clamp(1.1rem, 5vw, 3.5rem); border-top: 1px solid var(--line);
+  background-image: linear-gradient(rgba(234, 215, 190, 0.76), rgba(234, 215, 190, 0.76)), url('/brand/paper-kraft.jpg');
+  background-size: cover; background-position: center;
   /* Offsets scrollIntoView (sidebar/mobile-menu jumps) so the panel's own
      heading lands below the fixed header + mobile-nav + avatar bars,
      instead of scrolling underneath them. */
   scroll-margin-top: calc(var(--header-h) + var(--avatarbar-h));
 }
+:root[data-theme="dark"] .scene-panel { background-image: linear-gradient(rgba(18, 25, 29, 0.79), rgba(18, 25, 29, 0.79)), url('/brand/paper-kraft.jpg'); }
 .scene-panel:first-child { border-top: none; min-height: 60vh; }
+#welcome.scene-panel { background-image: linear-gradient(rgba(234, 215, 190, 0.62), rgba(234, 215, 190, 0.62)), url('/brand/paper-kraft.jpg'); }
+:root[data-theme="dark"] #welcome.scene-panel { background-image: linear-gradient(rgba(18, 25, 29, 0.79), rgba(18, 25, 29, 0.79)), url('/brand/paper-kraft.jpg'); }
 @media (min-width: 900px) {
   .scene-panel { min-height: 90vh; padding-top: 3rem; padding-bottom: 3rem; scroll-margin-top: var(--header-h); }
   .scene-panel:first-child { min-height: 100vh; }
@@ -392,6 +389,7 @@ p { color: var(--muted); margin: 0 0 1rem; }
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center; gap: 1rem;
   padding: 3rem clamp(1.25rem, 5vw, 3.5rem); border-top: 1px solid var(--line);
+  background: linear-gradient(rgba(234, 215, 190, 0.82), rgba(234, 215, 190, 0.82)), url('/brand/paper-kraft.jpg') center / cover;
 }
 .logo-chip--footer { height: 2.6rem; padding: 0; }
 .logo-chip--footer .logo-chip__img { height: 2.6rem; }

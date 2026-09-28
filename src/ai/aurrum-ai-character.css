@@ -248,6 +248,15 @@
 .aurrum-ai-character__history li.is-user { background: var(--accent); color: #fff; align-self: flex-end; }
 
 .aurrum-ai-character__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.aurrum-ai-character__greeting { margin: -.15rem 0 .05rem; color: var(--accent); font-size: .78rem; font-weight: 600; }
+
+/* Compact, persistent voice settings for Zenz. */
+.zenz-voice-panel { margin: .65rem 0; padding: 1rem; border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--line)); border-radius: 18px; background: color-mix(in srgb, var(--paper) 92%, #dffaf6); box-shadow: 0 16px 38px -28px rgba(6, 30, 43, .7); display: grid; gap: .72rem; animation: zenz-voice-in .26s var(--ease) both; }
+.zenz-voice-panel header { display: flex; align-items: start; justify-content: space-between; gap: .75rem; }.zenz-voice-panel header span { color: var(--accent); font-size: .65rem; font-weight: 800; letter-spacing: .12em; }.zenz-voice-panel h3 { margin: .15rem 0 0; font-size: 1.03rem; }.zenz-voice-panel header button { border: 0; background: transparent; color: var(--ink); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.zenz-voice-panel label { display: grid; gap: .3rem; color: var(--muted); font-size: .75rem; font-weight: 700; }.zenz-voice-panel select,.zenz-voice-panel input:not([type="range"]):not([type="checkbox"]) { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); padding: .55rem .65rem; font: inherit; }
+.zenz-voice-panel__profiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; }.zenz-voice-panel__profiles button { border: 1px solid var(--line); border-radius: 9px; padding: .46rem .28rem; background: var(--paper); color: var(--ink); font: inherit; font-size: .67rem; cursor: pointer; }.zenz-voice-panel__profiles button.is-selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--paper)); color: var(--accent); }
+.zenz-voice-panel__sliders { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; }.zenz-voice-panel input[type="range"] { accent-color: var(--accent); width: 100%; }.zenz-voice-panel__preview { display: flex; align-items: center; gap: .55rem; }.zenz-voice-panel__preview button { flex: 0 0 auto; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); padding: .52rem .72rem; font: inherit; font-size: .76rem; cursor: pointer; }.zenz-voice-panel__preview span,.zenz-voice-panel__upload small { color: var(--muted); font-size: .68rem; line-height: 1.35; }
+.zenz-voice-panel__upload { display: grid; gap: .42rem; padding-top: .68rem; border-top: 1px solid var(--line); }.zenz-voice-panel__upload strong { font-size: .76rem; color: var(--ink); }.zenz-voice-panel__upload label { display: flex; align-items: center; gap: .38rem; font-weight: 500; }.zenz-voice-panel__upload input[type="file"] { max-width: 100%; font-size: .7rem; }
 
 /* ---------- Section highlight on the EXISTING page (only adds an outline glow) ---------- */
 .aurrum-ai-character-highlight { position: relative; }
@@ -324,6 +333,7 @@ html.aurrum-ai-character-lock, html.aurrum-ai-character-lock body { overflow: hi
 @keyframes aic-wave { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
 @keyframes aic-blink { 50% { opacity: 0; } }
 @keyframes aic-sheet { from { opacity: 0; transform: translateY(24px); } }
+@keyframes zenz-voice-in { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Reduced motion: show every doodle fully drawn, no loops. */
 @media (prefers-reduced-motion: reduce) {

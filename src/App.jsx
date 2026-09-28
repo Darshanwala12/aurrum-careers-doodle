@@ -95,7 +95,7 @@ export default function App() {
         <div className="story__track">
           <ScenePanel id="welcome" eyebrow="Your career advisor" motif="stars">
             <h1>Meet Elena, the advisor who explains Aurrum Careers for you.</h1>
-            <p className="lede">Scroll — I'll walk you through it, or ask me anything.</p>
+        <p className="lede">Scroll. I'll walk you through it, or ask me anything.</p>
           </ScenePanel>
 
           <ScenePanel id="problem" eyebrow="The problem" motif="laptop">
@@ -126,7 +126,7 @@ export default function App() {
 
           <ScenePanel id="cv" eyebrow="Your CV" motif="cv">
             <h2>Your CV should say why, not just what.</h2>
-            <p>We rewrite it to meet UK hiring standards and pass ATS — so it makes the case for you.</p>
+        <p>We rewrite it to meet UK hiring standards and pass ATS, so it makes the case for you.</p>
           </ScenePanel>
 
           <ScenePanel id="applications" eyebrow="Applications" motif="jobcards">
@@ -136,7 +136,7 @@ export default function App() {
 
           <ScenePanel id="linkedin" eyebrow="LinkedIn" motif="linkedin">
             <h2>Your profile should say what your CV says.</h2>
-            <p>Headline, about, experience, skills, positioning — aligned and visible to recruiters.</p>
+        <p>Headline, about, experience, skills, and positioning, all aligned and visible to recruiters.</p>
           </ScenePanel>
 
           <ScenePanel id="interview" eyebrow="Interviews" motif="mic">
@@ -151,7 +151,7 @@ export default function App() {
 
           <ScenePanel id="trial" eyebrow="15-day free trial" motif="calendar">
             <h2>Try it before deciding what comes next.</h2>
-            <FlowList items={['Day 1 — Understand You', 'Day 2–5 — Build Positioning', 'Day 5–10 — Applications & Strategy', 'Day 10–15 — Interview & Next Steps']} />
+        <FlowList items={['Day 1: Understand You', 'Days 2–5: Build Positioning', 'Days 5–10: Applications & Strategy', 'Days 10–15: Interview & Next Steps']} />
           </ScenePanel>
 
           <ScenePanel id="final" eyebrow="Ready?" motif="target">

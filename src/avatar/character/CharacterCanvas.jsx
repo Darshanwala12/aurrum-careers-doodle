@@ -13,7 +13,7 @@ function disposeModel(root) {
     if (o.isSkinnedMesh) o.skeleton.dispose();
   });
 }
-export default function CharacterCanvas({ character = {}, halfBody = false, reducedMotion = false, paused = false, view = 0, modelUrl = MODEL_URL, onReady, onError }) {
+export default function CharacterCanvas({ character = {}, halfBody = false, reducedMotion = false, paused = false, view = 0, modelUrl = MODEL_URL, onReady, onError, ariaLabel = 'Elena, your animated 3D career counsellor', loadingLabel = 'Preparing Elena…', errorLabel = 'Elena is available in chat' }) {
   const host = useRef(null), controller = useRef(null), latest = useRef({});
   useEffect(() => { latest.current = { character, halfBody, reducedMotion, paused, view, onReady, onError }; });
   const [status, setStatus] = useState('loading');
@@ -85,8 +85,8 @@ export default function CharacterCanvas({ character = {}, halfBody = false, redu
       cleanupModel(); renderer?.domElement.removeEventListener('webglcontextlost', contextLost); renderer?.dispose(); node.replaceChildren();
     };
   }, [modelUrl]);
-  return <div className={`character-canvas character-canvas--${status}`} role="img" aria-label="Elena, your animated 3D career counsellor" data-character-status={status}>
+  return <div className={`character-canvas character-canvas--${status}`} role="img" aria-label={ariaLabel} data-character-status={status}>
     <div className="character-canvas__surface" ref={host} />
-    {status !== 'ready' && <span className="character-canvas__fallback" role="status">{status === 'error' ? 'Elena is available in chat' : 'Preparing Elena…'}</span>}
+    {status !== 'ready' && <span className="character-canvas__fallback" role="status">{status === 'error' ? errorLabel : loadingLabel}</span>}
   </div>;
 }

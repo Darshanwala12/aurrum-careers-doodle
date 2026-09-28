@@ -1,6 +1,23 @@
 import { VISEMES } from '../avatar/character/config.js';
 export const speechEvents = new EventTarget();
 let activeSpeech = null, owner = null, activeStop = null;
+export const VOICE_SETTINGS_KEY = 'zenz-voice-settings-v1';
+export const DEFAULT_VOICE_SETTINGS = { profile: 'warm', voiceId: '', volume: 0.9, rate: 1, pitch: 1.04, language: 'en-GB', greetingName: '' };
+export const VOICE_PROFILES = {
+  professional: { label: 'Professional', rate: 0.96, pitch: 0.98 },
+  warm: { label: 'Warm', rate: 0.98, pitch: 1.04 },
+  friendly: { label: 'Friendly', rate: 1.02, pitch: 1.08 },
+  energetic: { label: 'Energetic', rate: 1.1, pitch: 1.12 },
+  calm: { label: 'Calm', rate: 0.9, pitch: 0.96 },
+};
+export const getVoiceSettings = () => {
+  try { return { ...DEFAULT_VOICE_SETTINGS, ...JSON.parse(localStorage.getItem(VOICE_SETTINGS_KEY) || '{}') }; } catch { return { ...DEFAULT_VOICE_SETTINGS }; }
+};
+export const saveVoiceSettings = (next) => {
+  const value = { ...getVoiceSettings(), ...next };
+  try { localStorage.setItem(VOICE_SETTINGS_KEY, JSON.stringify(value)); } catch { /* private browsing can decline storage */ }
+  return value;
+};
 export const getActiveSpeech = () => activeSpeech;
 const emit = (type, detail = {}) => {
   if (type === 'start') activeSpeech = detail;
@@ -21,13 +38,14 @@ export function createBrowserVoice() {
       stop(); if (!synth) { onEnd?.(); return; }
       activeStop?.(); synth.cancel(); emit('end'); owner = id; activeStop = stop;
       const token = generation, live = () => generation === token && owner === id;
-      const voices = synth.getVoices().filter(v => /^en/i.test(v.lang));
+      const settings = getVoiceSettings();
+      const voices = synth.getVoices().filter(v => v.lang.toLowerCase().startsWith(settings.language.slice(0, 2).toLowerCase()));
       const female = /female|libby|sonia|hazel|susan|kate|serena|fiona|moira|karen|samantha|zira|aria|jenny|emma|google uk english female/i;
       const preferred = voices.filter(v => female.test(v.name));
-      const voice = preferred.find(v => /en-GB/i.test(v.lang)) ?? preferred[0];
+      const voice = voices.find(v => v.voiceURI === settings.voiceId) ?? preferred.find(v => new RegExp(settings.language, 'i').test(v.lang)) ?? preferred[0] ?? voices[0];
       const u = new SpeechSynthesisUtterance(text); utterance = u;
       if (voice) u.voice = voice;
-      u.lang = voice?.lang ?? 'en-GB'; u.rate = 1; u.pitch = 1.05;
+      u.lang = voice?.lang ?? settings.language; u.volume = settings.volume; u.rate = settings.rate; u.pitch = settings.pitch;
       u.onstart = () => { if (live()) { emit('start', { text }); onStart?.(); } };
       u.onboundary = e => {
         if (live() && (!e.name || e.name === 'word')) { emit('boundary', { text, charIndex: e.charIndex }); onBoundary?.(e.charIndex); }
@@ -60,7 +78,7 @@ export function createAudioVoice(endpoint, fallback = createBrowserVoice()) {
       const token = generation; abort = new AbortController();
       const live = () => token === generation;
       try {
-        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }), signal: abort.signal });
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, voice: getVoiceSettings() }), signal: abort.signal });
         if (!response.ok) throw new Error('TTS unavailable');
         const data = await response.json(); if (!live()) return;
         if (typeof data.audioUrl !== 'string') throw new Error('Missing audio URL');

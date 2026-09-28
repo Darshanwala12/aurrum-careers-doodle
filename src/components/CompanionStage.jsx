@@ -39,7 +39,7 @@ export default function CompanionStage({
         />
       </Suspense>
 
-      <ol className="journey-nav" aria-label="Story progress — jump to a point">
+      <ol className="journey-nav" aria-label="Story progress, jump to a point">
         {navScenes.map((s) => (
           <li key={s.id}>
             <button
